@@ -1,5 +1,6 @@
 import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { Link, Tabs } from 'expo-router';
 import { Pressable } from 'react-native';
 
@@ -48,10 +49,24 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="transactions"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Transactions',
+          tabBarIcon: ({ color }) => <AntDesign size={28} name="swap" color={color} />,
+          // headerRight: () => (
+          //   <Link href="/newTransaction" asChild>
+          //     <Pressable>
+          //       {({ pressed }) => (
+          //         <AntDesign
+          //           name="pluscircle"
+          //           size={25}
+          //           color={Colors[colorScheme ?? 'light'].text}
+          //           style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+          //         />
+          //       )}
+          //     </Pressable>
+          //   </Link>
+          // ),
         }}
       />
     </Tabs>

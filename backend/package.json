@@ -11,10 +11,15 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
     "express": "^4.21.1",
     "mongodb": "^6.10.0",
     "mongoose": "8.7.3",
-    "nodemon": "^2.0.22",
-    "dotenv": "^16.0.0"
+    "nodemon": "^2.0.22"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
   }
 }

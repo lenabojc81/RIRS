@@ -7,7 +7,7 @@ import { Text, View } from './Themed';
 
 import Colors from '@/constants/Colors';
 
-export default function EditScreenInfo({ path }: { path: string }) {
+export default function EditScreenInfo({ path }: { path?: string }) {
   return (
     <View>
       <View style={styles.getStartedContainer}>
@@ -22,7 +22,7 @@ export default function EditScreenInfo({ path }: { path: string }) {
           style={[styles.codeHighlightContainer, styles.homeScreenFilename]}
           darkColor="rgba(255,255,255,0.05)"
           lightColor="rgba(0,0,0,0.05)">
-          <MonoText>{path}</MonoText>
+          {path? <MonoText>{path}</MonoText> : <MonoText>no path provided</MonoText>}
         </View>
 
         <Text
