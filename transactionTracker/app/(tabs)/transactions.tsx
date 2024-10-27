@@ -3,15 +3,18 @@ import { Text, View } from "@/components/Themed";
 import React from "react";
 import TransactionList from "@/components/transactions/TransactionList";
 import NewTransactionButton from "@/components/transactions/NewTransactionButton";
+import Color from "@/constants/Colors";
 
 export default function TransactionsScreen() {
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
+                
             <TransactionList />
+
             <View style={styles.buttonContainer}>
                 <NewTransactionButton />
             </View>
-        </SafeAreaView>
+        </View>
     )
 };
 
@@ -32,7 +35,9 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
          position: 'absolute',
-         bottom: 25,
+         bottom: 10,
          alignSelf: 'center',
     },
+    list: {
+    }
 });

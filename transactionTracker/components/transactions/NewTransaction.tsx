@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Alert, Button, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { Alert, Button, StyleSheet, TextInput, Touchable, TouchableOpacity } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
@@ -18,7 +18,14 @@ export default function NewTransaction() {
     };
 
     const saveTransaction = async () => {
-        console.log(baseURL);
+        if (!transaction.name.trim()) {
+            Alert.alert('Validation Error', 'Please enter the name of the transaction.');
+            return;
+        }
+        if (!transaction.amount || transaction.amount <= 0) {
+            Alert.alert('Validation Error', 'Please enter a valid amount greater than 0.');
+            return;
+        }
         try {
             const response = await fetch(`${baseURL}/transaction/newTransaction`, {
                 method: 'POST',
@@ -85,7 +92,9 @@ export default function NewTransaction() {
                 </TouchableOpacity>
             </View>
 
-            <Button title="Save Transaction" onPress={saveTransaction} />
+            <TouchableOpacity onPress={() => saveTransaction()} style={styles.button}>
+                <Text style={styles.buttonText}>Save Transaction</Text>
+            </TouchableOpacity>
 
         </View>
     )
@@ -95,6 +104,7 @@ const styles = StyleSheet.create({
     container: {
         // flex: 1,
         paddingHorizontal: 20,
+        paddingTop: 20,
     },
     title: {
         fontSize: 20,
@@ -139,5 +149,18 @@ const styles = StyleSheet.create({
     },
     radioText: {
         fontSize: 16,
+    },
+    button: {
+        backgroundColor: '#007bff',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });

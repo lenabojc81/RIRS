@@ -53,6 +53,20 @@ export default function TabLayout() {
         options={{
           title: 'Transactions',
           tabBarIcon: ({ color }) => <AntDesign size={28} name="swap" color={color} />,
+          // headerRight: () => (
+          //   <Link href="/newTransaction" asChild>
+          //     <Pressable>
+          //       {({ pressed }) => (
+          //         <AntDesign
+          //           name="pluscircle"
+          //           size={25}
+          //           color={Colors[colorScheme ?? 'light'].text}
+          //           style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+          //         />
+          //       )}
+          //     </Pressable>
+          //   </Link>
+          // ),
         }}
       />
     </Tabs>
