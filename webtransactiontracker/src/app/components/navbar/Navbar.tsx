@@ -11,7 +11,27 @@ const Navbar: React.FC = () => {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <div className="navbar-nav">
-                        <Link href="/transactions" className="nav-link">Transactions</Link>
+                        {/* <Link href="/transactions" className="nav-link">Transactions</Link> */}
+                        <div className="nav-item dropdown">
+                            <a 
+                                className="nav-link dropdown-toggle"
+                                href="#"
+                                id="transactionsDropdown"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                            >
+                                Transactions
+                            </a>
+                            <ul className="dropdown-menu" aria-labelledby="transactionsDropdown">
+                                <li>
+                                    <Link href="/transactions" className="dropdown-item">Transaction List</Link>
+                                </li>
+                                <li>
+                                    <Link href="/transactions/new" className="dropdown-item">Add New Transaction</Link>
+                                </li>
+                            </ul>
+                        </div>
                         <Link href="#" className="nav-link">Home</Link>
                     </div>
                 </div>
