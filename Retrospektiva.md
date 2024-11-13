@@ -21,8 +21,10 @@ V prvem sprintu smo se osredotočili na implementacijo funkcionalnosti z najviš
 - sprememba zahtev (React Native -> React)
 - slabše določanje časa razvoja
 - težave v sodelovanju zaradi bolezni
+- implementacija Google prijave
 
 ## Pridobljene lekcije
 - ustvarjanje taskov za inicializacije projekta
 - pomembnost usklajevanja z naročnikom glede izbire tehnologije
 - ustvarjanje rezervnega načrta za občasne odsotnosti
+- rezervni načrt za funkcionalnosti, ki jih ne implementiramo sami – pri funkcionalnosti Google prijave smo naleteli na težave; v prihodnje bi bilo morda bolje, da take ključne funkcionalnosti implementiramo sami, da bi zagotovili stabilnost in nemoteno delovanje
