@@ -9,10 +9,11 @@ const Navbar: React.FC = () => {
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>
-                <div className="collapse navbar-collapse" id="navbarNav">
+                <div className="collapse navbar-collapse justify-content-center" id="navbarNav">
                     <div className="navbar-nav">
+                        <Link href="/new" className="nav-link">Add Transaction</Link>
                         {/* <Link href="/transactions" className="nav-link">Transactions</Link> */}
-                        <div className="nav-item dropdown">
+                        {/* <div className="nav-item dropdown">
                             <a 
                                 className="nav-link dropdown-toggle"
                                 href="#"
@@ -32,7 +33,7 @@ const Navbar: React.FC = () => {
                                 </li>
                             </ul>
                         </div>
-                        <Link href="#" className="nav-link">Home</Link>
+                        <Link href="#" className="nav-link">Home</Link> */}
                     </div>
                 </div>
             </div>

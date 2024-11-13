@@ -26,4 +26,15 @@ router.post('/newTransaction', async (req, res) => {
     }
 });
 
+router.delete('/deleteTransaction/:id', async (req, res) => {
+    try {
+        await Transaction.findByIdAndDelete(req.params.id);
+        console.log('transaction deleted');
+        res.status(200).send('transaction deleted');
+    } catch(err) {
+        console.error(err);
+        res.status(400).send({error: err });
+    }
+});
+
 export default router;

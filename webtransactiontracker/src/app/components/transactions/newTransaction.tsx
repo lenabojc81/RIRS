@@ -43,7 +43,7 @@ export default function NewTransaction() {
         }
 
         if (saved) {
-            redirect('/transactions');
+            redirect('/');
         }
     };
 
