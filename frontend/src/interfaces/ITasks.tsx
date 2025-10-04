@@ -1,4 +1,4 @@
-export interface ITransaction {
+export interface ITask {
     _id?: string;
     name: string;
     amount: number;
@@ -6,7 +6,7 @@ export interface ITransaction {
     date: Date;
 }
 
-export const initialTransaction: ITransaction = {
+export const initialTask: ITask = {
     name: "",
     amount: 0,
     expense: false,

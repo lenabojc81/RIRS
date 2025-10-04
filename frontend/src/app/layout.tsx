@@ -17,8 +17,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "TransactionTracker",
-  description: "Track your transactions",
+  title: "TaskTracker",
+  description: "Track your tasks efficiently",
 };
 
 export default function RootLayout({
