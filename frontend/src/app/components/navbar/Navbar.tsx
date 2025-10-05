@@ -12,6 +12,7 @@ const Navbar: React.FC = () => {
                 <div className="collapse navbar-collapse justify-content-center" id="navbarNav">
                     <div className="navbar-nav">
                         <Link href="/new" className="nav-link">Add Task</Link>
+                        <Link href="/tasks" className="nav-link">Task List</Link>
                         {/* <Link href="/transactions" className="nav-link">Transactions</Link> */}
                         {/* <div className="nav-item dropdown">
                             <a 

@@ -1,10 +1,8 @@
-import TaskList from "./components/tasks/taskList";
 
-export default function TaskScreen() {
+export default function HomeScreen() {
     return (
         <div>
-            <h1></h1>
-            <TaskList />
+            <h1>Task Management</h1>
         </div>
     )
 }

@@ -4,46 +4,31 @@ import React, { useState } from "react";
 import { ITask, initialTask } from "../../../interfaces/ITasks";
 import { baseURL } from "../../../../global";
 import { redirect } from "next/navigation";
+import { create } from "domain";
+import { createTask } from "@/data/fetch_tasks";
 
 export default function newTask() {
     const [task, setTask] = useState<ITask>(initialTask);
 
-    const handleTaskType = (isExpense: boolean) => {
-        setTask({ ...task, expense: isExpense, date: new Date() });
-    };
+    // const handleTaskType = (isExpense: boolean) => {
+    //     setTask({ ...task, expense: isExpense, date: new Date() });
+    // };
 
     const saveTask = async () => {
-        let saved = false;
         if (!task.name.trim()) {
             alert('Validation Error: Please enter the name of the task.');
             return;
         }
-        if (!task.amount || task.amount <= 0) {
-            alert('Validation Error: Please enter a valid amount greater than 0.');
-            return;
-        }
-        try {
-            const response = await fetch(`${baseURL}/task/newTask`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(task),
-            });
+        // if (!task.amount || task.amount <= 0) {
+        //     alert('Validation Error: Please enter a valid amount greater than 0.');
+        //     return;
+        // }
 
-            if (response.ok) {
-                setTask(initialTask);
-                saved = true;
-            } else {
-                alert('Error: Failed to save task.');
-            }
-        } catch (error) {
-            alert('Error: An error occurred while saving the task.');
-            console.error(error);
-        }
+        const saved = await createTask(task);
 
         if (saved) {
-            redirect('/');
+            setTask(initialTask);
+            redirect('/tasks');
         }
     };
 
@@ -63,22 +48,20 @@ export default function newTask() {
             </div>
 
             <div className="mb-3">
-                <label className="form-label">Amount</label>
+                <label className="form-label">Description</label>
                 <input
-                    type="number"
+                    type="text"
                     className="form-control"
-                    placeholder="Enter the amount"
-                    value={task.amount}
+                    placeholder="Enter the description"
+                    value={task.description}
                     onChange={(e) => {
                         const value = e.target.value;
-                        if (/^\d*\.?\d*$/.test(value)) {
-                            setTask({ ...task, amount: Number(value) });
-                        }
+                        setTask({ ...task, description: value });
                     }}
                 />
             </div>
 
-            <div className="mb-3">
+            {/* <div className="mb-3">
                 <label className="form-label">Type of Task</label>
                 <div className="d-flex">
                     <button
@@ -96,7 +79,7 @@ export default function newTask() {
                         Expense
                     </button>
                 </div>
-            </div>
+            </div> */}
 
             <button onClick={saveTask} className="btn btn-success w-100">
                 Save Task
