@@ -1,23 +1,22 @@
-import { ITask } from "@/interfaces/ITasks";
+import { initialTask, ITask } from "@/interfaces/ITasks";
 import React from "react";
 import TaskDetails from "../tasks/taskDetails";
 
 interface TaskModalProps {
-    task: ITask,
     setShowModal: (show: boolean) => void
 }
 
-export default function TaskModal({ task, setShowModal }: TaskModalProps) {
+export default function TaskCreateModal({ setShowModal }: TaskModalProps) {
     return (
         <div
-            className="modal fade show d-block"
+            className="modal show d-block"
             tabIndex={-1}
             style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
         >
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title">Task Details</h5>
+                        <h5 className="modal-title">Create Task</h5>
                         <button
                             type="button"
                             className="btn-close"
@@ -26,7 +25,7 @@ export default function TaskModal({ task, setShowModal }: TaskModalProps) {
                         ></button>
                     </div>
                     <div className="modal-body">
-                        <TaskDetails task={task} />
+                        <TaskDetails task={initialTask} mode="create" />
                     </div>
                 </div>
             </div>

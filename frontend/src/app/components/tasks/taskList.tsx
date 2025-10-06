@@ -2,10 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { ITask } from "../../../interfaces/ITasks";
-import { SlArrowDownCircle, SlArrowUpCircle, SlInfo } from "react-icons/sl";
-import TaskDetails from "./taskDetails";
+import { SlArrowUpCircle, SlInfo } from "react-icons/sl";
 import { fetchTasks } from "../../../data/fetch_tasks";
-import TaskModal from "../modals/taskModal";
+import TaskViewModal from "../modals/taskViewModal";
 
 export default function TaskList() {
     const [tasks, setTasks] = useState<ITask[]>([]);
@@ -104,7 +103,7 @@ export default function TaskList() {
             </nav>
 
             {showModal && selectedTask && (
-                <TaskModal task={selectedTask} setShowModal={setShowModal} />
+                <TaskViewModal task={selectedTask} setShowModal={setShowModal} />
             )}
         </div>
     );
