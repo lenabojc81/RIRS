@@ -31,7 +31,9 @@ export class AuthService {
                 email: email,
                 username: username.toLowerCase(),
                 createdAt: new Date(),
-                updatedAt: new Date()
+                updatedAt: new Date(),
+                tasks: [],
+                planners: []
             };
 
             // Save to Firestore
@@ -162,7 +164,29 @@ export class AuthService {
             const userDoc = await firestore.collection('users').doc(uid).get();
 
             if (userDoc.exists) {
-                return userDoc.data();
+                const userData = userDoc.data();
+                
+                // Migration: Ensure tasks and planners arrays exist
+                if (!userData.tasks || !userData.planners) {
+                    const updatedData = {
+                        ...userData,
+                        tasks: userData.tasks || [],
+                        planners: userData.planners || [],
+                        updatedAt: new Date()
+                    };
+                    
+                    // Update the user document with the new fields
+                    await firestore.collection('users').doc(uid).update({
+                        tasks: updatedData.tasks,
+                        planners: updatedData.planners,
+                        updatedAt: updatedData.updatedAt
+                    });
+                    
+                    console.log(`Migrated user ${uid} to include tasks and planners arrays`);
+                    return updatedData;
+                }
+                
+                return userData;
             }
             return null;
         } catch (error) {

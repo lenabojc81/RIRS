@@ -16,17 +16,64 @@ export default function DisplayPlanner() {
     const [currentGoalText, setCurrentGoalText] = React.useState("");
     const [editingGoalIndex, setEditingGoalIndex] = React.useState<number | null>(null);
 
+    // Helper function to safely convert dates
+    const safeConvertDate = (date: any): Date | undefined => {
+        if (!date) return undefined;
+        
+        try {
+            // Check if it's a Firebase Timestamp object
+            if (date && typeof date === 'object' && typeof date.toDate === 'function') {
+                return date.toDate();
+            }
+            
+            // Check if it's already a Date object
+            if (date instanceof Date) {
+                return date;
+            }
+            
+            // Try to convert string/number to Date
+            const converted = new Date(date);
+            return isNaN(converted.getTime()) ? undefined : converted;
+        } catch (error) {
+            console.error("Error converting date:", error, "Date value:", date);
+            return undefined;
+        }
+    };
+
+    // Helper function to sanitize planner dates
+    const sanitizePlanner = (planner: any): IPlanner => {
+        return {
+            ...planner,
+            date_start: safeConvertDate(planner.date_start) || new Date(),
+            date_end: safeConvertDate(planner.date_end),
+            date_done: safeConvertDate(planner.date_done)
+        };
+    };
+
     React.useEffect(() => {
         async function fetchData() {
-            const plannersFromDb = await getPlanners();
-            setPlanners(plannersFromDb);
+            try {
+                const plannersFromDb = await getPlanners();
+                console.log("Raw planners from DB:", plannersFromDb);
+                
+                // Sanitize all planners to ensure proper date handling
+                const sanitizedPlanners = plannersFromDb.map(sanitizePlanner);
+                console.log("Sanitized planners:", sanitizedPlanners);
+                
+                setPlanners(sanitizedPlanners);
+            } catch (error) {
+                console.error("Error fetching planners:", error);
+                setPlanners([]);
+            }
         }
         fetchData();
     }, []);
 
     React.useEffect(() => {
         if (selectedPlanner) {
-            setEditedPlanner(selectedPlanner);
+            // Ensure the selected planner has properly converted dates
+            const sanitizedPlanner = sanitizePlanner(selectedPlanner);
+            setEditedPlanner(sanitizedPlanner);
         }
     }, [selectedPlanner]);
 
@@ -166,8 +213,14 @@ export default function DisplayPlanner() {
     }
 
     const handlePlannerUpdate = async (updatedPlanner: IPlanner) => {
+        console.log("DisplayPlanner: handlePlannerUpdate called with:", updatedPlanner);
+        console.log("DisplayPlanner: Current selected planner:", selectedPlanner);
+        
         try {
+            console.log("DisplayPlanner: Calling updatePlanner API...");
             const success = await updatePlanner(updatedPlanner);
+            console.log("DisplayPlanner: updatePlanner API returned:", success);
+            
             if (success) {
                 setSelectedPlanner(updatedPlanner);
                 setEditedPlanner(updatedPlanner);
@@ -177,12 +230,14 @@ export default function DisplayPlanner() {
                 );
                 setPlanners(updatedPlanners);
                 
-                console.log("Planner updated successfully");
+                console.log("DisplayPlanner: Planner updated successfully");
+                console.log("DisplayPlanner: Updated planners list:", updatedPlanners);
             } else {
+                console.error("DisplayPlanner: updatePlanner returned false");
                 alert("Failed to update planner");
             }
         } catch (error) {
-            console.error("Error updating planner:", error);
+            console.error("DisplayPlanner: Error updating planner:", error);
             alert("Error updating planner");
         }
     }

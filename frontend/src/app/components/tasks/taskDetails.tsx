@@ -11,7 +11,41 @@ interface TaskDetailsProps {
 }
 
 const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
-    const [editedTask, setEditedTask] = React.useState<ITask>(task);
+    // Helper function to safely convert dates
+    const safeConvertDate = (date: any): Date | undefined => {
+        if (!date) return undefined;
+        
+        try {
+            // Check if it's a Firebase Timestamp object
+            if (date && typeof date === 'object' && typeof date.toDate === 'function') {
+                return date.toDate();
+            }
+            
+            // Check if it's already a Date object
+            if (date instanceof Date) {
+                return date;
+            }
+            
+            // Try to convert string/number to Date
+            const converted = new Date(date);
+            return isNaN(converted.getTime()) ? undefined : converted;
+        } catch (error) {
+            console.error("Error converting date:", error, "Date value:", date);
+            return undefined;
+        }
+    };
+
+    // Helper function to sanitize task dates
+    const sanitizeTask = (task: ITask): ITask => {
+        return {
+            ...task,
+            date_start: safeConvertDate(task.date_start) || new Date(),
+            date_end: safeConvertDate(task.date_end),
+            date_done: safeConvertDate(task.date_done)
+        };
+    };
+
+    const [editedTask, setEditedTask] = React.useState<ITask>(sanitizeTask(task));
     const [currentMode, setCurrentMode] = React.useState(mode);
 
     React.useEffect(() => {
@@ -103,7 +137,10 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
             {(currentMode === "view" && task.date_end !== undefined) && (
                 <p>
                     <strong>Due date: </strong>
-                    {new Date(task.date_end).toLocaleDateString()}
+                    {(() => {
+                        const date = safeConvertDate(task.date_end);
+                        return date ? date.toLocaleDateString() : 'No date set';
+                    })()}
                 </p>
             )}
             {(currentMode === "edit" || currentMode === "create") && (
@@ -111,24 +148,33 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
                     <strong>Due date</strong>
                     <input
                         type="date"
-                        value={
-                            editedTask.date_end
-                                ? typeof editedTask.date_end === "string"
-                                    ? editedTask.date_end
-                                    : editedTask.date_end.toISOString().split("T")[0]
-                                : ""
-                        }
-                        onChange={(e) => handleChange("date_end", e.target.value)}
+                        value={(() => {
+                            if (!editedTask.date_end) return "";
+                            try {
+                                const date = safeConvertDate(editedTask.date_end);
+                                return date ? date.toISOString().split("T")[0] : "";
+                            } catch (error) {
+                                console.error("Error formatting date for input:", error);
+                                return "";
+                            }
+                        })()}
+                        onChange={(e) => {
+                            const newDate = e.target.value ? new Date(e.target.value) : undefined;
+                            handleChange("date_end", newDate);
+                        }}
                         className="form-control mb-2"
                     />
                 </div>
             )}
 
             {/* date_done */}
-            {(currentMode === "view" && task.date_done !== undefined) && (
+            {(currentMode === "view" && task.date_done !== undefined && task.date_done !== null) && (
                 <p>
                     <strong>Completed date: </strong>
-                    {new Date(task.date_done).toLocaleDateString()}
+                    {(() => {
+                        const date = safeConvertDate(task.date_done);
+                        return date ? date.toLocaleDateString() : 'Invalid date';
+                    })()}
                 </p>
             )}
             {/* {(currentMode === "edit" || currentMode === "create") && (

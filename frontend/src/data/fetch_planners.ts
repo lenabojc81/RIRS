@@ -11,12 +11,15 @@ export async function createPlanner(planner: IPlanner) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ ...planner, date_start: new Date() }),
+            body: JSON.stringify(planner),
         })
 
         if (response.status === 201) {
-            return true;
+            const data = await response.json();
+            return data.success;
         } else {
+            const errorData = await response.json();
+            console.error('Error creating planner:', errorData.error);
             alert('Error: Failed to save planner.');
             return false;
         }
@@ -52,8 +55,15 @@ export async function getPlanners() {
 };
 
 export async function updatePlanner(planner: IPlanner) {
+    console.log("fetch_planners: updatePlanner called with:", planner);
+    console.log("fetch_planners: Planner ID:", planner.id);
+    
     try {
-        const response = await fetch(`${baseURL}/planner/editPlanner/${planner.id}`, {
+        const url = `${baseURL}/planner/editPlanner/${planner.id}`;
+        console.log("fetch_planners: Making PUT request to:", url);
+        console.log("fetch_planners: Request body:", JSON.stringify(planner, null, 2));
+        
+        const response = await fetch(url, {
             method: 'PUT',
             credentials: 'include', // Include authentication cookies
             headers: {
@@ -62,14 +72,22 @@ export async function updatePlanner(planner: IPlanner) {
             body: JSON.stringify(planner),
         })
 
+        console.log("fetch_planners: Response status:", response.status);
+        console.log("fetch_planners: Response headers:", response.headers);
+
         if (response.status === 200) {
-            return true;
+            const data = await response.json();
+            console.log("fetch_planners: Response data:", data);
+            return data.success;
         } else {
-            alert('Error: Failed to save planner.');
+            const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
+            console.error('fetch_planners: Error response:', errorData);
+            alert(`Error: Failed to save planner. ${errorData.error || 'Unknown error'}`);
             return false;
         }
     } catch (error) {
-        console.error(error);
+        console.error('fetch_planners: Network or other error:', error);
+        alert('Error: Network error occurred while saving planner.');
         return false;
     }
 }
@@ -85,8 +103,11 @@ export async function deletePlanner(plannerId: string) {
         })
 
         if (response.status === 200) {
-            return true;
+            const data = await response.json();
+            return data.success;
         } else {
+            const errorData = await response.json();
+            console.error('Error deleting planner:', errorData.error);
             alert('Error: Failed to delete planner.');
             return false;
         }

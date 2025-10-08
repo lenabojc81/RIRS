@@ -14,17 +14,69 @@ export default function PlannerDetails({ planner, onPlannerUpdate }: PlannerDeta
     const [isEditing, setIsEditing] = React.useState(false);
     const [editedPlanner, setEditedPlanner] = React.useState<IPlanner>(planner);
 
+    // Helper function to safely convert dates
+    const safeConvertDate = (date: any): Date | undefined => {
+        if (!date) return undefined;
+        
+        try {
+            // Check if it's a Firebase Timestamp object
+            if (date && typeof date === 'object' && typeof date.toDate === 'function') {
+                return date.toDate();
+            }
+            
+            // Check if it's already a Date object
+            if (date instanceof Date) {
+                return date;
+            }
+            
+            // Try to convert string/number to Date
+            const converted = new Date(date);
+            return isNaN(converted.getTime()) ? undefined : converted;
+        } catch (error) {
+            console.error("Error converting date:", error, "Date value:", date);
+            return undefined;
+        }
+    };
+
     React.useEffect(() => {
-        setEditedPlanner(planner);
+        // Safely handle potential Firebase Timestamp objects
+        const safePlanner = {
+            ...planner,
+            date_start: safeConvertDate(planner.date_start) || new Date(),
+            date_end: safeConvertDate(planner.date_end),
+            date_done: safeConvertDate(planner.date_done)
+        };
+        setEditedPlanner(safePlanner);
     }, [planner]);
 
     const formatDateForInput = (date: Date | string | undefined): string => {
         if (!date) return "";
-        const d = new Date(date);
-        return d.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        
+        try {
+            const d = new Date(date);
+            
+            // Check if the date is valid
+            if (isNaN(d.getTime())) {
+                console.warn("Invalid date provided to formatDateForInput:", date);
+                return "";
+            }
+            
+            return d.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        } catch (error) {
+            console.error("Error formatting date:", error, "Date value:", date);
+            return "";
+        }
     };
 
     const handleSave = async () => {
+        console.log("PlannerDetails: handleSave called with:", editedPlanner);
+        
+        // Validate required fields
+        if (!editedPlanner.title.trim()) {
+            alert("Title is required.");
+            return;
+        }
+
         // Validate dates
         if (editedPlanner.date_end && editedPlanner.date_start) {
             const startDate = new Date(editedPlanner.date_start);
@@ -37,8 +89,18 @@ export default function PlannerDetails({ planner, onPlannerUpdate }: PlannerDeta
         }
 
         if (onPlannerUpdate) {
-            await onPlannerUpdate(editedPlanner);
-            setIsEditing(false);
+            console.log("PlannerDetails: Calling onPlannerUpdate...");
+            try {
+                await onPlannerUpdate(editedPlanner);
+                setIsEditing(false);
+                console.log("PlannerDetails: Update successful, edit mode disabled");
+            } catch (error) {
+                console.error("PlannerDetails: Error during update:", error);
+                alert("Failed to save changes. Please try again.");
+            }
+        } else {
+            console.error("PlannerDetails: onPlannerUpdate callback is not provided");
+            alert("Unable to save changes - missing update callback.");
         }
     };
 
@@ -129,7 +191,20 @@ export default function PlannerDetails({ planner, onPlannerUpdate }: PlannerDeta
                                             <i className="bi bi-card-heading fs-5"></i>
                                         </div>
                                         <h5 className="card-title">Title</h5>
-                                        <p className="card-text h6 text-primary">{planner.title}</p>
+                                        {isEditing ? (
+                                            <input
+                                                type="text"
+                                                className="form-control form-control-lg text-center"
+                                                value={editedPlanner.title}
+                                                onChange={(e) => setEditedPlanner({
+                                                    ...editedPlanner,
+                                                    title: e.target.value
+                                                })}
+                                                placeholder="Enter planner title"
+                                            />
+                                        ) : (
+                                            <p className="card-text h6 text-primary">{planner.title}</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -147,14 +222,20 @@ export default function PlannerDetails({ planner, onPlannerUpdate }: PlannerDeta
                                                 type="date"
                                                 className="form-control form-control-lg"
                                                 value={formatDateForInput(editedPlanner.date_start)}
-                                                onChange={(e) => setEditedPlanner({
-                                                    ...editedPlanner,
-                                                    date_start: new Date(e.target.value)
-                                                })}
+                                                onChange={(e) => {
+                                                    const newDate = e.target.value ? new Date(e.target.value) : new Date();
+                                                    setEditedPlanner({
+                                                        ...editedPlanner,
+                                                        date_start: newDate
+                                                    });
+                                                }}
                                             />
                                         ) : (
                                             <p className="card-text h6 text-success">
-                                                {planner.date_start ? new Date(planner.date_start).toLocaleDateString() : 'Not set'}
+                                                {(() => {
+                                                    const date = safeConvertDate(planner.date_start);
+                                                    return date ? date.toLocaleDateString() : 'Not set';
+                                                })()}
                                             </p>
                                         )}
                                     </div>
@@ -174,14 +255,20 @@ export default function PlannerDetails({ planner, onPlannerUpdate }: PlannerDeta
                                                 type="date"
                                                 className="form-control form-control-lg"
                                                 value={formatDateForInput(editedPlanner.date_end)}
-                                                onChange={(e) => setEditedPlanner({
-                                                    ...editedPlanner,
-                                                    date_end: e.target.value ? new Date(e.target.value) : undefined
-                                                })}
+                                                onChange={(e) => {
+                                                    const newDate = e.target.value ? new Date(e.target.value) : undefined;
+                                                    setEditedPlanner({
+                                                        ...editedPlanner,
+                                                        date_end: newDate
+                                                    });
+                                                }}
                                             />
                                         ) : (
                                             <p className="card-text h6 text-warning">
-                                                {planner.date_end ? new Date(planner.date_end).toLocaleDateString() : 'Not set'}
+                                                {(() => {
+                                                    const date = safeConvertDate(planner.date_end);
+                                                    return date ? date.toLocaleDateString() : 'Not set';
+                                                })()}
                                             </p>
                                         )}
                                     </div>
@@ -200,7 +287,10 @@ export default function PlannerDetails({ planner, onPlannerUpdate }: PlannerDeta
                                             {planner.date_done ? (
                                                 <span className="badge bg-success fs-6 px-3 py-2">
                                                     <SlCheck className="me-1" />
-                                                    Completed on {new Date(planner.date_done).toLocaleDateString()}
+                                                    Completed on {(() => {
+                                                        const date = safeConvertDate(planner.date_done);
+                                                        return date ? date.toLocaleDateString() : 'Unknown date';
+                                                    })()}
                                                 </span>
                                             ) : (
                                                 <>

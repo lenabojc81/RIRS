@@ -13,10 +13,55 @@ export default function TaskList() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
+    // Helper function to safely convert dates
+    const safeConvertDate = (date: any): Date | undefined => {
+        if (!date) return undefined;
+        
+        try {
+            // Check if it's a Firebase Timestamp object
+            if (date && typeof date === 'object' && typeof date.toDate === 'function') {
+                return date.toDate();
+            }
+            
+            // Check if it's already a Date object
+            if (date instanceof Date) {
+                return date;
+            }
+            
+            // Try to convert string/number to Date
+            const converted = new Date(date);
+            return isNaN(converted.getTime()) ? undefined : converted;
+        } catch (error) {
+            console.error("Error converting date:", error, "Date value:", date);
+            return undefined;
+        }
+    };
+
+    // Helper function to sanitize task dates
+    const sanitizeTask = (task: any): ITask => {
+        return {
+            ...task,
+            date_start: safeConvertDate(task.date_start) || new Date(),
+            date_end: safeConvertDate(task.date_end),
+            date_done: safeConvertDate(task.date_done)
+        };
+    };
+
     useEffect(() => {
         (async () => {
-            const data = await fetchTasks();
-            setTasks(data as ITask[]);
+            try {
+                const data = await fetchTasks();
+                console.log("Raw tasks from DB:", data);
+                
+                // Sanitize all tasks to ensure proper date handling
+                const sanitizedTasks = data.map(sanitizeTask);
+                console.log("Sanitized tasks:", sanitizedTasks);
+                
+                setTasks(sanitizedTasks);
+            } catch (error) {
+                console.error("Error fetching tasks:", error);
+                setTasks([]);
+            }
         })();
     }, []);
 
@@ -100,7 +145,10 @@ export default function TaskList() {
                                 </div>
                                 <div className="d-flex flex-column align-items-end">
                                     <small className="text-muted mb-1">
-                                        {new Date(task.date_start).toLocaleDateString()}
+                                        {(() => {
+                                            const date = safeConvertDate(task.date_start);
+                                            return date ? date.toLocaleDateString() : 'No date';
+                                        })()}
                                     </small>
                                     <button
                                         className="btn btn-outline-info btn-sm"

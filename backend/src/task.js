@@ -1,65 +1,186 @@
 import express from 'express';
-import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, orderBy } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { database } from '../firebase.js';
+import { AuthService } from './services/authService.js';
 
 const router = express.Router();
 
-const tasksCollection = collection(database, 'tasks');
-
-router.get('/getTasks', async (req, res) => {
+// Middleware to verify authentication
+const authenticateUser = async (req, res, next) => {
     try {
-    // Query tasks ordered by date_start descending (newest first)
-    const q = query(tasksCollection, orderBy('date_start', 'desc'));
-    const querySnapshot = await getDocs(q);
-    const tasks = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const token = req.cookies.authToken;
+        if (!token) {
+            return res.status(401).json({ success: false, error: 'No authentication token' });
+        }
+
+        const decoded = await AuthService.verifyToken(token);
+        if (!decoded) {
+            return res.status(401).json({ success: false, error: 'Invalid authentication token' });
+        }
+
+        req.user = decoded;
+        next();
+    } catch (error) {
+        console.error('Authentication error:', error);
+        res.status(401).json({ success: false, error: 'Invalid authentication token' });
+    }
+};
+
+// Get all tasks for the authenticated user
+router.get('/getTasks', authenticateUser, async (req, res) => {
+    try {
+        const userDocRef = doc(database, 'users', req.user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const userData = userDoc.data();
+        let tasks = userData.tasks || [];
+        
+        // Migration: Ensure all tasks have IDs
+        let needsUpdate = false;
+        tasks = tasks.map(task => {
+            if (!task.id) {
+                needsUpdate = true;
+                return { ...task, id: generateUniqueId() };
+            }
+            return task;
+        });
+        
+        // If tasks were updated with IDs, save them back to the database
+        if (needsUpdate) {
+            await updateDoc(userDocRef, {
+                tasks: tasks,
+                updatedAt: new Date()
+            });
+            console.log(`Added IDs to tasks for user: ${req.user.uid}`);
+        }
+        
+        // Sort tasks by date_start descending (newest first)
+        tasks.sort((a, b) => {
+            const dateA = new Date(a.date_start.toDate ? a.date_start.toDate() : a.date_start);
+            const dateB = new Date(b.date_start.toDate ? b.date_start.toDate() : b.date_start);
+            return dateB.getTime() - dateA.getTime();
+        });
+
         res.status(200).json(tasks);
-        console.log('tasks successfully fetched');
+        console.log('Tasks successfully fetched for user:', req.user.uid);
     } catch (err) {
-        console.error(err);
-        res.status(400).send({error: err });
+        console.error('Error fetching tasks:', err);
+        res.status(400).json({ error: err.message });
     }
 });
 
-router.post('/createTask', async (req, res) => {
+// Generate a unique ID
+const generateUniqueId = () => {
+    return Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9);
+};
+
+// Create a new task for the authenticated user
+router.post('/createTask', authenticateUser, async (req, res) => {
     try {
-        const newTask = req.body;
-        await addDoc(collection(database, 'tasks'), newTask);
-        console.log('new task saved');
-        res.status(201).send('new task saved');
+        const newTask = {
+            ...req.body,
+            id: generateUniqueId(), // Generate unique ID
+            date_start: new Date()
+        };
+
+        const userDocRef = doc(database, 'users', req.user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const userData = userDoc.data();
+        const currentTasks = userData.tasks || [];
+        
+        // Add new task to user's tasks array
+        await updateDoc(userDocRef, {
+            tasks: [...currentTasks, newTask],
+            updatedAt: new Date()
+        });
+
+        console.log('New task saved for user:', req.user.uid);
+        res.status(201).json({ success: true, task: newTask });
     } catch(err) {
-        console.error(err);
-        res.status(400).send({error: err });
+        console.error('Error creating task:', err);
+        res.status(400).json({ error: err.message });
     }
 });
 
-router.delete('/deleteTask/:id', async (req, res) => {
+// Delete a task by ID for the authenticated user
+router.delete('/deleteTask/:id', authenticateUser, async (req, res) => {
     try {
         const taskId = req.params.id;
-        const taskDoc = doc(database, 'tasks', taskId);
-        await deleteDoc(taskDoc);
-        console.log('task deleted');
-        res.status(200).send('task deleted');
+        const userDocRef = doc(database, 'users', req.user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const userData = userDoc.data();
+        const currentTasks = userData.tasks || [];
+        
+        // Filter out the task to delete
+        const updatedTasks = currentTasks.filter(task => task.id !== taskId);
+        
+        if (updatedTasks.length === currentTasks.length) {
+            return res.status(404).json({ success: false, error: 'Task not found' });
+        }
+
+        // Update user document with filtered tasks
+        await updateDoc(userDocRef, {
+            tasks: updatedTasks,
+            updatedAt: new Date()
+        });
+
+        console.log('Task deleted for user:', req.user.uid);
+        res.status(200).json({ success: true });
     } catch(err) {
-        console.error(err);
-        res.status(400).send({error: err });
+        console.error('Error deleting task:', err);
+        res.status(400).json({ error: err.message });
     }
 });
 
-router.put('/editTask/:id', async (req, res) => {
+// Update a task by ID for the authenticated user
+router.put('/editTask/:id', authenticateUser, async (req, res) => {
     try {
         const taskId = req.params.id;
-        const taskDoc = doc(database, 'tasks', taskId);
-        const updatedTask = await updateDoc(taskDoc, req.body);
+        const userDocRef = doc(database, 'users', req.user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
 
-        // if (!updatedTask) {
-        //     return res.status(404).send({ error: 'Task not found' });
-        // }
+        const userData = userDoc.data();
+        const currentTasks = userData.tasks || [];
+        
+        // Find and update the specific task
+        const taskIndex = currentTasks.findIndex(task => task.id === taskId);
+        
+        if (taskIndex === -1) {
+            return res.status(404).json({ success: false, error: 'Task not found' });
+        }
 
-        console.log('Task successfully updated');
-        res.status(200).json(updatedTask);
+        // Update the task at the found index
+        currentTasks[taskIndex] = { ...currentTasks[taskIndex], ...req.body };
+        
+        // Update user document with modified tasks
+        await updateDoc(userDocRef, {
+            tasks: currentTasks,
+            updatedAt: new Date()
+        });
+
+        console.log('Task successfully updated for user:', req.user.uid);
+        res.status(200).json({ success: true, task: currentTasks[taskIndex] });
     } catch (err) {
-        console.error(err);
-        res.status(400).send({ error: 'Failed to update task' });
+        console.error('Error updating task:', err);
+        res.status(400).json({ error: err.message });
     }
 });
 

@@ -33,7 +33,7 @@ const Navbar: React.FC = () => {
                     <div className="collapse navbar-collapse" id="navbarNav">
                         {user && (
                             <div className="navbar-nav me-auto">
-                                <Link href="/tasks" className="nav-link">Task List</Link>
+                                <Link href="/tasks" className="nav-link">Tasks</Link>
                                 <Link href="/planners" className="nav-link">Planners</Link>
                             </div>
                         )}

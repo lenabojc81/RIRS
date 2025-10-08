@@ -1,4 +1,6 @@
 import { baseURL } from '../../global';
+import { ITask } from '../interfaces/ITasks';
+import { IPlanner } from '../interfaces/IPlanner';
 
 export interface UserProfile {
     uid: string;
@@ -6,6 +8,8 @@ export interface UserProfile {
     username: string;
     createdAt?: Date;
     updatedAt?: Date;
+    tasks: ITask[];
+    planners: IPlanner[];
 }
 
 export interface AuthResponse {

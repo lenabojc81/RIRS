@@ -28,8 +28,11 @@ export async function deleteTask(id: string): Promise<boolean> {
         });
 
         if (response.ok) {
-            return true;
+            const data = await response.json();
+            return data.success;
         } else {
+            const errorData = await response.json();
+            console.error('Error deleting task:', errorData.error);
             alert('Error: Failed to delete task.');
             return false;
         }
@@ -48,12 +51,15 @@ export async function createTask(task: ITask) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ ...task, date_start: new Date() }),
+            body: JSON.stringify(task),
         })
 
         if (response.status === 201) {
-            return true;
+            const data = await response.json();
+            return data.success;
         } else {
+            const errorData = await response.json();
+            console.error('Error creating task:', errorData.error);
             alert('Error: Failed to save task.');
             return false;
         }
@@ -78,10 +84,11 @@ export async function updateTask(task: ITask) {
 
         console.log("Update response status:", response.status); // Debug log
         if (response.status === 200) {
-            return true;
+            const data = await response.json();
+            return data.success;
         } else {
-            const errorText = await response.text();
-            console.error("Update failed:", errorText); // Debug log
+            const errorData = await response.json();
+            console.error("Update failed:", errorData.error); // Debug log
             alert('Error: Failed to save task.');
             return false;
         }
