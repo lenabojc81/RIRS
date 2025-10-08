@@ -1,45 +1,99 @@
-import React from "react";
+'use client';
+
+import React, { useState } from "react";
 import Link from "next/link";
+import { useAuth } from "../../../contexts/AuthContext";
+import AuthModal from "../auth/AuthModal";
 
 const Navbar: React.FC = () => {
+    const { user, loading, logout } = useAuth();
+    const [showAuthModal, setShowAuthModal] = useState(false);
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    };
+
+    const handleAuthSuccess = () => {
+        // Auth modal will be closed automatically
+        // User state will be updated via the auth context
+    };
+
     return (
-        <nav className='navbar navbar-expand-lg bg-body-tertiary'>
-            <div className="container-fluid">
-                <Link className='navbar-brand' href='/'>TT</Link>
-                <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-                <div className="collapse navbar-collapse justify-content-center" id="navbarNav">
-                    <div className="navbar-nav">
-                        {/* <Link href="/new" className="nav-link">Add Task</Link> */}
-                        <Link href="/tasks" className="nav-link">Task List</Link>
-                        <Link href="/planners" className="nav-link">Planners</Link>
-                        {/* <Link href="/transactions" className="nav-link">Transactions</Link> */}
-                        {/* <div className="nav-item dropdown">
-                            <a 
-                                className="nav-link dropdown-toggle"
-                                href="#"
-                                id="transactionsDropdown"
-                                role="button"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                            >
-                                Transactions
-                            </a>
-                            <ul className="dropdown-menu" aria-labelledby="transactionsDropdown">
-                                <li>
-                                    <Link href="/transactions" className="dropdown-item">Transaction List</Link>
-                                </li>
-                                <li>
-                                    <Link href="/transactions/new" className="dropdown-item">Add New Transaction</Link>
-                                </li>
-                            </ul>
+        <>
+            <nav className='navbar navbar-expand-lg bg-body-tertiary'>
+                <div className="container-fluid">
+                    <Link className='navbar-brand' href='/'>TT</Link>
+                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span className="navbar-toggler-icon"></span>
+                    </button>
+                    <div className="collapse navbar-collapse" id="navbarNav">
+                        {user && (
+                            <div className="navbar-nav me-auto">
+                                <Link href="/tasks" className="nav-link">Task List</Link>
+                                <Link href="/planners" className="nav-link">Planners</Link>
+                            </div>
+                        )}
+                        <div className="navbar-nav">
+                            {loading ? (
+                                <div className="nav-link">
+                                    <span className="spinner-border spinner-border-sm" role="status"></span>
+                                </div>
+                            ) : user ? (
+                                <div className="nav-item dropdown">
+                                    <a 
+                                        className="nav-link dropdown-toggle"
+                                        href="#"
+                                        id="userDropdown"
+                                        role="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                    >
+                                        <i className="bi bi-person-circle me-1"></i>
+                                        {user.username}
+                                    </a>
+                                    <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                        <li>
+                                            <span className="dropdown-item-text">
+                                                <small className="text-muted">Signed in as</small><br/>
+                                                <strong>{user.username}</strong>
+                                            </span>
+                                        </li>
+                                        <li><hr className="dropdown-divider" /></li>
+                                        <li>
+                                            <button 
+                                                className="dropdown-item"
+                                                onClick={handleLogout}
+                                            >
+                                                <i className="bi bi-box-arrow-right me-2"></i>
+                                                Sign out
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            ) : (
+                                <button 
+                                    className="btn btn-outline-primary"
+                                    onClick={() => setShowAuthModal(true)}
+                                >
+                                    <i className="bi bi-person-plus me-1"></i>
+                                    Sign In
+                                </button>
+                            )}
                         </div>
-                        <Link href="#" className="nav-link">Home</Link> */}
                     </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
+
+            <AuthModal 
+                show={showAuthModal}
+                onHide={() => setShowAuthModal(false)}
+                onAuthSuccess={handleAuthSuccess}
+            />
+        </>
     )
 };
 
