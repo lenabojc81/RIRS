@@ -100,41 +100,65 @@ export default function addGoalBtnInput({ mode, planner, category, start_date, e
     };
 
     return (
-        <div>
-            <p><strong>Add goals for {mode} {category}</strong></p>
-            {showAddGoalBtn ? (
-                <div className="d-flex justify-content-center">
-                    <button
-                        className="btn btn-md btn-primary ms-2 mb-2"
-                        onClick={() => { handleToggleGoal(false) }}
-                        disabled={getGoalCountByCategory() >= 7}
-                    >
-                        Add Goal {getGoalCountByCategory() >= 7 ? "(Max 7)" : `(${getGoalCountByCategory()}/7)`}
-                    </button>
+        <div className="row mb-4">
+            <div className="col-12">
+                <div className="card border-0 shadow-sm">
+                    <div className="card-body p-4">
+                        <div className="text-center">
+                            <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                 style={{width: '50px', height: '50px'}}>
+                                <i className="bi bi-plus-lg fs-5"></i>
+                            </div>
+                            <h5 className="card-title">Add New Goal</h5>
+                            <p className="text-muted mb-3">Add goals for {category} category</p>
+                            
+                            {showAddGoalBtn ? (
+                                <button
+                                    className="btn btn-success btn-lg px-4"
+                                    onClick={() => { handleToggleGoal(false) }}
+                                    disabled={getGoalCountByCategory() >= 7}
+                                >
+                                    <i className="bi bi-plus-circle me-2"></i>
+                                    Add Goal {getGoalCountByCategory() >= 7 ? "(Max 7)" : `(${getGoalCountByCategory()}/7)`}
+                                </button>
+                            ) : (
+                                <div className="d-flex flex-column align-items-center gap-3">
+                                    <div className="w-100" style={{maxWidth: '400px'}}>
+                                        <input
+                                            type="text"
+                                            value={currentGoalText}
+                                            onChange={(e) => setCurrentGoalText(e.target.value)}
+                                            className="form-control form-control-lg"
+                                            placeholder="Enter your goal..."
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <div className="btn-group">
+                                        <button
+                                            className="btn btn-success"
+                                            onClick={() => { handleToggleGoal(true) }}
+                                            disabled={!currentGoalText.trim()}
+                                        >
+                                            <i className="bi bi-check-lg me-1"></i>
+                                            Save Goal
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={() => {
+                                                setCurrentGoalText("");
+                                                handleToggleGoal(false);
+                                            }}
+                                        >
+                                            <i className="bi bi-x-lg me-1"></i>
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
-            ) : (
-                <div className="mb-3">
-                    <input
-                        type="text"
-                        value={currentGoalText}
-                        onChange={(e) => setCurrentGoalText(e.target.value)}
-                        className="form-control mb-2"
-                        placeholder="Enter your goal..."
-                    />
-                    <button
-                        className="btn btn-sm btn-success me-2"
-                        onClick={() => { handleToggleGoal(true) }}
-                        disabled={!currentGoalText.trim()}
-                    >Save Goal</button>
-                    <button
-                        className="btn btn-sm btn-secondary"
-                        onClick={() => {
-                            setCurrentGoalText("");
-                            handleToggleGoal(false);
-                        }}
-                    >Cancel</button>
-                </div>
-            )}
+            </div>
         </div>
     )
 }

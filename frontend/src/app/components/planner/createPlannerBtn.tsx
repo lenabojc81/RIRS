@@ -8,15 +8,19 @@ const CreatePlannerBtn: React.FC = () => {
     const [showModal, setShowModal] = React.useState(false);
 
     return (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <button className="btn btn-primary m-3" onClick={() => setShowModal(true)}>
-                New Planner
+        <>
+            <button 
+                className="btn btn-warning btn-lg px-5 py-3 shadow-sm"
+                onClick={() => setShowModal(true)}
+            >
+                <i className="bi bi-plus-circle me-2"></i>
+                Create New Planner
             </button>
 
             {showModal && (
                 <PlannerViewModal planner={initialPlanner} setShowModal={setShowModal} mode='create' />
             )}
-        </div>
+        </>
     );
 };
 

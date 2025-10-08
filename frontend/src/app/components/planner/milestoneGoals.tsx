@@ -256,11 +256,11 @@ export default function MilestoneGoals({ planner, setEditedPlanner, onGoalAdded,
         const hasGoals = hasExistingGoals(type, value);
 
         if (isSelected) {
-            return 'btn-success'; // Green for selected
+            return 'btn-success border-0 shadow-sm'; // Green for selected
         } else if (hasGoals) {
-            return 'btn-secondary'; // Gray for existing goals
+            return 'btn-warning border-0 shadow-sm'; // Warning for existing goals
         } else {
-            return 'btn-outline-dark'; // Default outline
+            return 'btn-outline-info border-2'; // Default outline
         }
     };
 
@@ -392,8 +392,10 @@ export default function MilestoneGoals({ planner, setEditedPlanner, onGoalAdded,
                 );
             case null:
                 return (
-                    <div className="text-center text-muted mt-4">
-                        <p>Please select a view (Year, Month, or Week) to see milestone goals.</p>
+                    <div className="alert alert-light border-2 text-center py-5">
+                        <SlStar size={48} className="text-muted mb-3" />
+                        <h6 className="text-muted mb-2">Select a Time View</h6>
+                        <p className="text-muted mb-0">Please select a view (Year, Month, or Week) to see milestone goals.</p>
                     </div>
                 );
             default:
@@ -402,47 +404,52 @@ export default function MilestoneGoals({ planner, setEditedPlanner, onGoalAdded,
     };
 
     return (
-        <div>
-            <h3>Milestone Goals</h3>
-
-            <div className="btn-group mb-4" role="group" aria-label="View selector">
-                <button
-                    type="button"
-                    onClick={() => {
-                        setActiveView(activeView === 'year' ? null : 'year');
-                        setSelectedYear(null);
-                        setSelectedMonth(null);
-                        setSelectedButton(null);
-                    }}
-                    className={`btn ${activeView === 'year' ? 'btn-primary' : 'btn-outline-primary'}`}
-                >
-                    Year
-                </button>
-                <button
-                    type="button"
-                    onClick={() => {
-                        setActiveView(activeView === 'month' ? null : 'month');
-                        setSelectedYear(null);
-                        setSelectedMonth(null);
-                        setSelectedButton(null);
-                    }}
-                    className={`btn ${activeView === 'month' ? 'btn-primary' : 'btn-outline-primary'}`}
-                >
-                    Month
-                </button>
-                <button
-                    type="button"
-                    onClick={() => {
-                        setActiveView(activeView === 'week' ? null : 'week');
-                        setSelectedYear(null);
-                        setSelectedMonth(null);
-                        setSelectedButton(null);
-                    }}
-                    className={`btn ${activeView === 'week' ? 'btn-primary' : 'btn-outline-primary'}`}
-                >
-                    Week
-                </button>
+        <div className="card border-0 shadow-sm">
+            <div className="card-header bg-info border-0">
+                <h3 className="card-title text-white mb-0 d-flex align-items-center">
+                    <SlStar className="me-2" size={24} />
+                    Milestone Goals
+                </h3>
             </div>
+            <div className="card-body">
+                <div className="btn-group mb-4" role="group" aria-label="View selector">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setActiveView(activeView === 'year' ? null : 'year');
+                            setSelectedYear(null);
+                            setSelectedMonth(null);
+                            setSelectedButton(null);
+                        }}
+                        className={`btn ${activeView === 'year' ? 'btn-info' : 'btn-outline-info'}`}
+                    >
+                        Year
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setActiveView(activeView === 'month' ? null : 'month');
+                            setSelectedYear(null);
+                            setSelectedMonth(null);
+                            setSelectedButton(null);
+                        }}
+                        className={`btn ${activeView === 'month' ? 'btn-info' : 'btn-outline-info'}`}
+                    >
+                        Month
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setActiveView(activeView === 'week' ? null : 'week');
+                            setSelectedYear(null);
+                            setSelectedMonth(null);
+                            setSelectedButton(null);
+                        }}
+                        className={`btn ${activeView === 'week' ? 'btn-info' : 'btn-outline-info'}`}
+                    >
+                        Week
+                    </button>
+                </div>
 
             {/* Year filter buttons for month view */}
             {activeView === 'month' && (
@@ -529,103 +536,114 @@ export default function MilestoneGoals({ planner, setEditedPlanner, onGoalAdded,
 
             {/* Add Goal Modal/Component */}
             {showAddGoal && selectedPeriod && (
-                <div className="mt-4 p-3 border rounded bg-light">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                        <h5>{readOnly ? 'Goals for Selected Period' : 'Add Goal for Selected Period'}</h5>
+                <div className="card mt-4 border-0 shadow-sm">
+                    <div className="card-header bg-success border-0 d-flex justify-content-between align-items-center">
+                        <h5 className="text-white mb-0">
+                            {readOnly ? 'Goals for Selected Period' : 'Add Goal for Selected Period'}
+                        </h5>
                         <button
                             type="button"
-                            className="btn btn-sm btn-outline-secondary"
+                            className="btn btn-sm btn-outline-light border-2"
                             onClick={() => {
                                 setShowAddGoal(false);
                                 setSelectedPeriod(null);
                                 setSelectedButton(null);
                             }}
+                            title="Close"
                         >
-                            ×
+                            <SlClose size={16} />
                         </button>
                     </div>
-                    <p className="text-muted mb-3">
-                        Period: {selectedPeriod.start_date.toLocaleDateString()} - {selectedPeriod.end_date.toLocaleDateString()}
-                    </p>
+                    <div className="card-body">
+                        <div className="alert alert-info mb-3">
+                            <strong>Period:</strong> {selectedPeriod.start_date.toLocaleDateString()} - {selectedPeriod.end_date.toLocaleDateString()}
+                        </div>
                     
-                    {/* Show existing goals for the selected period */}
-                    <div className="mb-4">
-                        <h6>Existing Goals for This Period</h6>
-                        {getGoalsForSelectedPeriod().length > 0 ? (
-                            <div className="mb-3">
-                                {getGoalsForSelectedPeriod().map((goal, periodIndex) => {
-                                    const originalIndex = planner.goals?.findIndex(g => g === goal) ?? -1;
-                                    return (
-                                        <div key={originalIndex} className="d-flex align-items-center p-3 border rounded bg-light mb-1">
-                                            <div className="me-3">
-                                                <SlStar size={40} className="text-primary" />
+                        {/* Show existing goals for the selected period */}
+                        <div className="mb-4">
+                            <h6 className="text-muted text-uppercase fw-bold mb-3">Existing Goals for This Period</h6>
+                            {getGoalsForSelectedPeriod().length > 0 ? (
+                                <div className="row g-3 mb-3">
+                                    {getGoalsForSelectedPeriod().map((goal, periodIndex) => {
+                                        const originalIndex = planner.goals?.findIndex(g => g === goal) ?? -1;
+                                        return (
+                                            <div key={originalIndex} className="col-12">
+                                                <div className="card border-0 shadow-sm h-100">
+                                                    <div className="card-body d-flex align-items-center">
+                                                        <div className="me-3">
+                                                            <SlStar size={24} className="text-warning" />
+                                                        </div>
+                                                        {editingGoalIndex !== originalIndex ? (
+                                                            <div className="flex-grow-1">
+                                                                <div className="fw-bold text-dark">{goal.text}</div>
+                                                            </div>
+                                                        ) : (
+                                                            <textarea
+                                                                value={currentGoalText}
+                                                                onChange={(e) => setCurrentGoalText(e.target.value)}
+                                                                className="form-control me-2 border-2"
+                                                                rows={2}
+                                                                style={{ resize: 'vertical', minHeight: '50px' }}
+                                                            />
+                                                        )}
+                                                        {editingGoalIndex !== originalIndex ? (
+                                                            <div className="btn-group">
+                                                                <button
+                                                                    className={`btn btn-sm btn-outline-secondary border-2 ${readOnly ? 'disabled' : ''}`}
+                                                                    onClick={() => {
+                                                                        if (!readOnly) {
+                                                                            setCurrentGoalText(goal.text);
+                                                                            setEditingGoalIndex(originalIndex);
+                                                                        }
+                                                                    }}
+                                                                    title="Edit Goal"
+                                                                    disabled={readOnly}
+                                                                >
+                                                                    <SlPencil size={14} />
+                                                                </button>
+                                                                <button
+                                                                    className={`btn btn-sm btn-outline-danger border-2 ${readOnly ? 'disabled' : ''}`}
+                                                                    onClick={() => !readOnly && handleDelete(goal.text)}
+                                                                    title="Delete Goal"
+                                                                    disabled={readOnly}
+                                                                >
+                                                                    <SlTrash size={14} />
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="btn-group">
+                                                                <button
+                                                                    className="btn btn-sm btn-success border-0 shadow-sm"
+                                                                    onClick={() => handleSaveGoalEdit(originalIndex)}
+                                                                    title="Save"
+                                                                >
+                                                                    <SlPaperPlane size={14} />
+                                                                </button>
+                                                                <button
+                                                                    className="btn btn-sm btn-outline-secondary border-2"
+                                                                    onClick={() => { 
+                                                                        setEditingGoalIndex(null); 
+                                                                        setCurrentGoalText(""); 
+                                                                    }}
+                                                                    title="Cancel"
+                                                                >
+                                                                    <SlClose size={14} />
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            {editingGoalIndex !== originalIndex ? (
-                                                <div className="transactionDetails flex-grow-1">
-                                                    <div className="transactionName mb-1 fw-bold">{goal.text}</div>
-                                                </div>
-                                            ) : (
-                                                <textarea
-                                                    value={currentGoalText}
-                                                    onChange={(e) => setCurrentGoalText(e.target.value)}
-                                                    className="form-control me-2"
-                                                    rows={2}
-                                                    style={{ resize: 'vertical', minHeight: '50px', maxWidth: '400px' }}
-                                                />
-                                            )}
-                                            {editingGoalIndex !== originalIndex ? (
-                                                <div className="d-flex gap-1">
-                                                    <button
-                                                        className={`btn btn-sm btn-secondary ${readOnly ? 'disabled' : ''}`}
-                                                        onClick={() => {
-                                                            if (!readOnly) {
-                                                                setCurrentGoalText(goal.text);
-                                                                setEditingGoalIndex(originalIndex);
-                                                            }
-                                                        }}
-                                                        aria-label="Edit Goal"
-                                                        disabled={readOnly}
-                                                    >
-                                                        <SlPencil size={20} />
-                                                    </button>
-                                                    <button
-                                                        className={`btn btn-sm btn-danger ${readOnly ? 'disabled' : ''}`}
-                                                        onClick={() => !readOnly && handleDelete(goal.text)}
-                                                        aria-label="Delete Goal"
-                                                        disabled={readOnly}
-                                                    >
-                                                        <SlTrash size={20} />
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <div className="d-flex gap-1">
-                                                    <button
-                                                        className="btn btn-sm btn-success"
-                                                        onClick={() => handleSaveGoalEdit(originalIndex)}
-                                                        aria-label="Save"
-                                                    >
-                                                        <SlPaperPlane size={20} />
-                                                    </button>
-                                                    <button
-                                                        className="btn btn-sm btn-secondary"
-                                                        onClick={() => { 
-                                                            setEditingGoalIndex(null); 
-                                                            setCurrentGoalText(""); 
-                                                        }}
-                                                        aria-label="Cancel"
-                                                    >
-                                                        <SlClose size={20} />
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <p className="text-muted fst-italic">No goals for this time period</p>
-                        )}
-                    </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="alert alert-light border-2 text-center">
+                                    <SlStar size={32} className="text-muted mb-2" />
+                                    <p className="text-muted mb-0 fst-italic">No goals for this time period</p>
+                                </div>
+                            )}
+                        </div>
 
                     {/* Only show add goal input if planner is not completed */}
                     {!readOnly && (
@@ -644,16 +662,18 @@ export default function MilestoneGoals({ planner, setEditedPlanner, onGoalAdded,
                         />
                     )}
                     
-                    {/* Show read-only notice for completed planners */}
-                    {readOnly && (
-                        <div className="alert alert-info mt-3" role="alert">
-                            <small>
-                                <strong>Read-only mode:</strong> This planner is completed and cannot be modified.
-                            </small>
-                        </div>
-                    )}
+                        {/* Show read-only notice for completed planners */}
+                        {readOnly && (
+                            <div className="alert alert-info mt-3" role="alert">
+                                <small>
+                                    <strong>Read-only mode:</strong> This planner is completed and cannot be modified.
+                                </small>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
+            </div>
         </div>
     )
 }

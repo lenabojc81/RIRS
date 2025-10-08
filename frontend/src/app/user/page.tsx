@@ -23,197 +23,242 @@ export default function UserPage() {
 
     return (
         <ProtectedRoute>
-            <div className="container mt-4">
-                <div className="row justify-content-center">
-                    <div className="col-md-8 col-lg-6">
-                        <div className="card shadow-sm">
-                            <div className="card-header bg-primary text-white">
-                                <h3 className="card-title mb-0">
-                                    <i className="bi bi-person-circle me-2"></i>
-                                    User Profile
-                                </h3>
-                            </div>
-                            <div className="card-body">
-                                {user && (
-                                    <div className="mb-4">
-                                        <div className="text-center mb-4">
-                                            <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                                 style={{width: '100px', height: '100px'}}>
-                                                <i className="bi bi-person-fill" style={{fontSize: '3rem'}}></i>
-                                            </div>
-                                            <h4 className="mb-1">{user.username}</h4>
-                                            <p className="text-muted mb-0">Task Manager User</p>
-                                        </div>
-
-                                        <div className="row g-3">
-                                            <div className="col-12">
-                                                <div className="border rounded p-3 bg-light">
-                                                    <div className="row">
-                                                        <div className="col-sm-4">
-                                                            <strong className="text-muted">
-                                                                <i className="bi bi-person me-1"></i>
-                                                                Username:
-                                                            </strong>
-                                                        </div>
-                                                        <div className="col-sm-8">
-                                                            <span className="text-dark">{user.username}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="col-12">
-                                                <div className="border rounded p-3 bg-light">
-                                                    <div className="row">
-                                                        <div className="col-sm-4">
-                                                            <strong className="text-muted">
-                                                                <i className="bi bi-envelope me-1"></i>
-                                                                Email:
-                                                            </strong>
-                                                        </div>
-                                                        <div className="col-sm-8">
-                                                            <span className="text-dark">{user.email}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {user.createdAt && (
-                                                <div className="col-12">
-                                                    <div className="border rounded p-3 bg-light">
-                                                        <div className="row">
-                                                            <div className="col-sm-4">
-                                                                <strong className="text-muted">
-                                                                    <i className="bi bi-calendar-plus me-1"></i>
-                                                                    Member Since:
-                                                                </strong>
-                                                            </div>
-                                                            <div className="col-sm-8">
-                                                                <span className="text-dark">
-                                                                    {new Date(user.createdAt).toLocaleDateString('en-US', {
-                                                                        year: 'numeric',
-                                                                        month: 'long',
-                                                                        day: 'numeric'
-                                                                    })}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="card-footer bg-light">
-                                <div className="row g-2">
-                                    <div className="col-sm-6">
-                                        <button 
-                                            className="btn btn-outline-secondary w-100"
-                                            onClick={() => router.back()}
-                                        >
-                                            <i className="bi bi-arrow-left me-1"></i>
-                                            Back
-                                        </button>
-                                    </div>
-                                    <div className="col-sm-6">
-                                        <button 
-                                            className="btn btn-danger w-100"
-                                            onClick={handleLogout}
-                                            disabled={isLoggingOut}
-                                        >
-                                            {isLoggingOut ? (
-                                                <>
-                                                    <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                                                    Signing out...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <i className="bi bi-box-arrow-right me-1"></i>
-                                                    Sign Out
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+            {/* Hero Section */}
+            <section className="bg-primary text-white py-5">
+                <div className="container">
+                    <div className="row align-items-center">
+                        <div className="col-lg-8">
+                            <h1 className="display-5 fw-bold mb-3">
+                                Welcome back, 
+                                <span className="text-warning">{user?.username}</span>!
+                            </h1>
+                            <p className="lead mb-4">
+                                Manage your profile, track your progress, and continue your productivity journey.
+                            </p>
                         </div>
-
-                        {/* Quick Actions Card */}
-                        <div className="card shadow-sm mt-4">
-                            <div className="card-header bg-light">
-                                <h5 className="card-title mb-0">
-                                    <i className="bi bi-lightning me-2"></i>
-                                    Quick Actions
-                                </h5>
-                            </div>
-                            <div className="card-body">
-                                <div className="row g-2">
-                                    <div className="col-sm-6">
-                                        <button 
-                                            className="btn btn-outline-primary w-100"
-                                            onClick={() => router.push('/tasks')}
-                                        >
-                                            <i className="bi bi-list-task me-1"></i>
-                                            View Tasks
-                                        </button>
-                                    </div>
-                                    <div className="col-sm-6">
-                                        <button 
-                                            className="btn btn-outline-success w-100"
-                                            onClick={() => router.push('/planners')}
-                                        >
-                                            <i className="bi bi-bullseye me-1"></i>
-                                            View Planners
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Account Stats Card */}
-                        <div className="card shadow-sm mt-4">
-                            <div className="card-header bg-light">
-                                <h5 className="card-title mb-0">
-                                    <i className="bi bi-graph-up me-2"></i>
-                                    Account Overview
-                                </h5>
-                            </div>
-                            <div className="card-body">
-                                <div className="row text-center">
-                                    <div className="col-4">
-                                        <div className="border-end">
-                                            <h4 className="text-primary mb-1">
-                                                <i className="bi bi-check-circle"></i>
-                                            </h4>
-                                            <small className="text-muted">Tasks</small>
-                                        </div>
-                                    </div>
-                                    <div className="col-4">
-                                        <div className="border-end">
-                                            <h4 className="text-success mb-1">
-                                                <i className="bi bi-target"></i>
-                                            </h4>
-                                            <small className="text-muted">Planners</small>
-                                        </div>
-                                    </div>
-                                    <div className="col-4">
-                                        <h4 className="text-info mb-1">
-                                            <i className="bi bi-trophy"></i>
-                                        </h4>
-                                        <small className="text-muted">Goals</small>
-                                    </div>
-                                </div>
-                                <div className="text-center mt-3">
-                                    <small className="text-muted">
-                                        Keep up the great work managing your productivity!
-                                    </small>
-                                </div>
+                        <div className="col-lg-4 text-center">
+                            <div className="bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg" 
+                                 style={{width: '120px', height: '120px'}}>
+                                <i className="bi bi-person-fill text-primary" style={{fontSize: '4rem'}}></i>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
+
+            {/* Profile Content */}
+            <section className="py-5">
+                <div className="container">
+                    {user && (
+                        <>
+                            {/* Profile Information */}
+                            <div className="row g-4 mb-5">
+                                <div className="col-12">
+                                    <h2 className="display-6 fw-bold mb-4 text-center">Profile Information</h2>
+                                </div>
+                                
+                                <div className="col-md-6 col-lg-4">
+                                    <div className="card h-100 border-0 shadow-sm">
+                                        <div className="card-body text-center p-4">
+                                            <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                                 style={{width: '60px', height: '60px'}}>
+                                                <i className="bi bi-person fs-4"></i>
+                                            </div>
+                                            <h4 className="card-title">Username</h4>
+                                            <p className="card-text h5 text-primary">{user.username}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-md-6 col-lg-4">
+                                    <div className="card h-100 border-0 shadow-sm">
+                                        <div className="card-body text-center p-4">
+                                            <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                                 style={{width: '60px', height: '60px'}}>
+                                                <i className="bi bi-envelope fs-4"></i>
+                                            </div>
+                                            <h4 className="card-title">Email Address</h4>
+                                            <p className="card-text h6 text-success">{user.email}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {user.createdAt && (
+                                    <div className="col-md-6 col-lg-4">
+                                        <div className="card h-100 border-0 shadow-sm">
+                                            <div className="card-body text-center p-4">
+                                                <div className="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                                     style={{width: '60px', height: '60px'}}>
+                                                    <i className="bi bi-calendar-plus fs-4"></i>
+                                                </div>
+                                                <h4 className="card-title">Member Since</h4>
+                                                <p className="card-text h6 text-info">
+                                                    {new Date(user.createdAt).toLocaleDateString('en-US', {
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric'
+                                                    })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Quick Actions */}
+                            <div className="row g-4 mb-5">
+                                <div className="col-12">
+                                    <h2 className="display-6 fw-bold mb-4 text-center">Quick Actions</h2>
+                                </div>
+                                
+                                <div className="col-md-6 col-lg-3">
+                                    <div className="card h-100 border-0 shadow-sm">
+                                        <div className="card-body text-center p-4">
+                                            <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                                 style={{width: '60px', height: '60px'}}>
+                                                <i className="bi bi-list-task fs-4"></i>
+                                            </div>
+                                            <h4 className="card-title">My Tasks</h4>
+                                            <p className="card-text text-muted mb-3">
+                                                View and manage your personal tasks
+                                            </p>
+                                            <button 
+                                                className="btn btn-primary w-100"
+                                                onClick={() => router.push('/tasks')}
+                                            >
+                                                View Tasks
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-md-6 col-lg-3">
+                                    <div className="card h-100 border-0 shadow-sm">
+                                        <div className="card-body text-center p-4">
+                                            <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                                 style={{width: '60px', height: '60px'}}>
+                                                <i className="bi bi-bullseye fs-4"></i>
+                                            </div>
+                                            <h4 className="card-title">My Planners</h4>
+                                            <p className="card-text text-muted mb-3">
+                                                Access your goal-oriented planners
+                                            </p>
+                                            <button 
+                                                className="btn btn-success w-100"
+                                                onClick={() => router.push('/planners')}
+                                            >
+                                                View Planners
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-md-6 col-lg-3">
+                                    <div className="card h-100 border-0 shadow-sm">
+                                        <div className="card-body text-center p-4">
+                                            <div className="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                                 style={{width: '60px', height: '60px'}}>
+                                                <i className="bi bi-arrow-left fs-4"></i>
+                                            </div>
+                                            <h4 className="card-title">Go Back</h4>
+                                            <p className="card-text text-muted mb-3">
+                                                Return to previous page
+                                            </p>
+                                            <button 
+                                                className="btn btn-warning w-100"
+                                                onClick={() => router.back()}
+                                            >
+                                                Go Back
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-md-6 col-lg-3">
+                                    <div className="card h-100 border-0 shadow-sm">
+                                        <div className="card-body text-center p-4">
+                                            <div className="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                                 style={{width: '60px', height: '60px'}}>
+                                                <i className="bi bi-box-arrow-right fs-4"></i>
+                                            </div>
+                                            <h4 className="card-title">Sign Out</h4>
+                                            <p className="card-text text-muted mb-3">
+                                                Securely log out of your account
+                                            </p>
+                                            <button 
+                                                className="btn btn-danger w-100"
+                                                onClick={handleLogout}
+                                                disabled={isLoggingOut}
+                                            >
+                                                {isLoggingOut ? (
+                                                    <>
+                                                        <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                                                        Signing out...
+                                                    </>
+                                                ) : (
+                                                    'Sign Out'
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Account Overview */}
+                            <div className="row g-4">
+                                <div className="col-12">
+                                    <h2 className="display-6 fw-bold mb-4 text-center">Account Overview</h2>
+                                </div>
+                                
+                                <div className="col-md-4">
+                                    <div className="card h-100 border-0 shadow-sm">
+                                        <div className="card-body text-center p-4">
+                                            <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                                 style={{width: '60px', height: '60px'}}>
+                                                <i className="bi bi-check-circle fs-4"></i>
+                                            </div>
+                                            <h4 className="card-title">Tasks Completed</h4>
+                                            <p className="card-text text-muted">
+                                                Track your productivity with completed task metrics and achievement progress.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-md-4">
+                                    <div className="card h-100 border-0 shadow-sm">
+                                        <div className="card-body text-center p-4">
+                                            <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                                 style={{width: '60px', height: '60px'}}>
+                                                <i className="bi bi-target fs-4"></i>
+                                            </div>
+                                            <h4 className="card-title">Active Planners</h4>
+                                            <p className="card-text text-muted">
+                                                Monitor your goal-oriented planners and milestone achievements.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-md-4">
+                                    <div className="card h-100 border-0 shadow-sm">
+                                        <div className="card-body text-center p-4">
+                                            <div className="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                                 style={{width: '60px', height: '60px'}}>
+                                                <i className="bi bi-trophy fs-4"></i>
+                                            </div>
+                                            <h4 className="card-title">Goals Achieved</h4>
+                                            <p className="card-text text-muted">
+                                                Celebrate your successes with completed goals and milestones.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </section>
         </ProtectedRoute>
     );
 }

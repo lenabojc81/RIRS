@@ -189,29 +189,40 @@ export default function DisplayPlanner() {
 
     return (
         <div>
-            <div className="d-flex justify-content-center align-items-center">
-                <div className="mb-3 text-center">
-                    <label className="form-label fw-bold"><h2>Select a Planner</h2></label>
-                    <select
-                        className="form-select"
-                        value={selectedPlanner?.id ?? (planners[0]?.id ?? "")}
-                        onChange={(e) => {
-                            const planner = planners.find(p => p.id === e.target.value);
-                            setSelectedPlanner(planner ?? null);
-                        }}
-                        style={{
-                            width: selectedPlanner
-                                ? `calc(${selectedPlanner.title.length}ch + 15px)`
-                                : "auto",
-                            minWidth: "120px",
-                        }}
-                    >
-                        {planners.map((planner) => (
-                            <option key={planner.id} value={planner.id}>
-                                {planner.title}
-                            </option>
-                        ))}
-                    </select>
+            {/* Planner Selection Section */}
+            <div className="row mb-5">
+                <div className="col-12 text-center">
+                    <div className="card border-0 shadow-sm">
+                        <div className="card-body p-4">
+                            <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                 style={{width: '60px', height: '60px'}}>
+                                <i className="bi bi-list-ul fs-4"></i>
+                            </div>
+                            <h3 className="card-title mb-3">Select a Planner</h3>
+                            <p className="text-muted mb-3">Choose from your existing planners to view and manage</p>
+                            <select
+                                className="form-select form-select-lg mx-auto shadow-sm"
+                                value={selectedPlanner?.id ?? (planners[0]?.id ?? "")}
+                                onChange={(e) => {
+                                    const planner = planners.find(p => p.id === e.target.value);
+                                    setSelectedPlanner(planner ?? null);
+                                }}
+                                style={{
+                                    width: selectedPlanner
+                                        ? `calc(${selectedPlanner.title.length}ch + 60px)`
+                                        : "auto",
+                                    minWidth: "200px",
+                                    maxWidth: "400px"
+                                }}
+                            >
+                                {planners.map((planner) => (
+                                    <option key={planner.id} value={planner.id}>
+                                        {planner.title}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
             {selectedPlanner &&
@@ -264,14 +275,27 @@ export default function DisplayPlanner() {
                         readOnly={isPlannerCompleted(selectedPlanner)}
                     />
                     
-                    <div className="mt-4 d-flex justify-content-center">
-                        <button
-                            className="btn btn-danger btn-lg"
-                            onClick={handleDeletePlanner}
-                            type="button"
-                        >
-                            Delete Planner
-                        </button>
+                    <div className="mt-5 text-center">
+                        <div className="card border-0 shadow-sm">
+                            <div className="card-body p-4">
+                                <div className="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                     style={{width: '60px', height: '60px'}}>
+                                    <i className="bi bi-trash fs-4"></i>
+                                </div>
+                                <h4 className="card-title mb-3">Danger Zone</h4>
+                                <p className="text-muted mb-3">
+                                    Permanently delete this planner and all its goals. This action cannot be undone.
+                                </p>
+                                <button
+                                    className="btn btn-danger btn-lg px-4"
+                                    onClick={handleDeletePlanner}
+                                    type="button"
+                                >
+                                    <i className="bi bi-trash me-2"></i>
+                                    Delete Planner
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             }
