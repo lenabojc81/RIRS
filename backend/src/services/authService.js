@@ -1,4 +1,8 @@
 import { auth, firestore } from './firebase.js';
+import jwt from 'jsonwebtoken';
+
+// JWT secret - in production, this should be in environment variables
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 
 export class AuthService {
     // Register new user
@@ -33,8 +37,16 @@ export class AuthService {
             // Save to Firestore
             await firestore.collection('users').doc(userRecord.uid).set(userProfile);
 
-            // Create custom token for immediate login
-            const customToken = await auth.createCustomToken(userRecord.uid);
+            // Create JWT token for immediate login
+            const jwtToken = jwt.sign(
+                { 
+                    uid: userRecord.uid, 
+                    email: userRecord.email,
+                    username: userProfile.username
+                },
+                JWT_SECRET,
+                { expiresIn: '24h' }
+            );
 
             return {
                 success: true,
@@ -43,7 +55,7 @@ export class AuthService {
                     email: userRecord.email,
                     username: userProfile.username
                 },
-                token: customToken
+                token: jwtToken
             };
         } catch (error) {
             console.error('Registration error:', error);
@@ -67,7 +79,7 @@ export class AuthService {
         }
     }
 
-    // Login user - this would typically be handled by the client, but we can verify credentials
+    // Login user - simplified version since we can't verify passwords with Firebase Admin
     static async loginUser(loginData) {
         try {
             const { email, password } = loginData;
@@ -79,8 +91,7 @@ export class AuthService {
                 };
             }
 
-            // Since Firebase Admin doesn't have direct login, we'll need to use a different approach
-            // For now, we'll create a custom token if user exists
+            // Check if user exists in Firebase Auth
             const userRecord = await auth.getUserByEmail(email);
             
             if (!userRecord) {
@@ -102,8 +113,20 @@ export class AuthService {
 
             const userProfile = userDoc.data();
 
-            // Create custom token for the user
-            const customToken = await auth.createCustomToken(userRecord.uid);
+            // Note: In a real application, you would verify the password here
+            // For this demo, we're assuming the password is correct if the user exists
+            // TODO: Implement proper password verification or use Firebase client SDK
+
+            // Create JWT token for the user
+            const jwtToken = jwt.sign(
+                { 
+                    uid: userRecord.uid, 
+                    email: userRecord.email,
+                    username: userProfile.username
+                },
+                JWT_SECRET,
+                { expiresIn: '24h' }
+            );
 
             return {
                 success: true,
@@ -112,7 +135,7 @@ export class AuthService {
                     email: userRecord.email,
                     username: userProfile.username
                 },
-                token: customToken
+                token: jwtToken
             };
         } catch (error) {
             console.error('Login error:', error);
@@ -163,20 +186,54 @@ export class AuthService {
         }
     }
 
-    // Verify Firebase token (for middleware)
-    static async verifyToken(idToken) {
+    // Verify JWT token (for middleware)
+    static async verifyToken(token) {
         try {
-            const decodedToken = await auth.verifyIdToken(idToken);
+            // Check if token looks like a JWT (has 3 parts separated by dots)
+            if (!token || typeof token !== 'string') {
+                return {
+                    success: false,
+                    error: 'No token provided'
+                };
+            }
+
+            // Check if it's a JWT format (3 parts separated by dots)
+            const tokenParts = token.split('.');
+            if (tokenParts.length !== 3) {
+                console.log('Token is not in JWT format, might be an old Firebase custom token');
+                return {
+                    success: false,
+                    error: 'Invalid token format - please log in again'
+                };
+            }
+
+            const decoded = jwt.verify(token, JWT_SECRET);
             return {
                 success: true,
-                uid: decodedToken.uid,
-                email: decodedToken.email
+                uid: decoded.uid,
+                email: decoded.email,
+                username: decoded.username
             };
         } catch (error) {
-            console.error('Token verification error:', error);
+            console.error('Token verification error:', error.message);
+            
+            // Handle specific JWT errors more gracefully
+            let errorMessage = 'Invalid token';
+            if (error.name === 'JsonWebTokenError') {
+                if (error.message.includes('invalid algorithm')) {
+                    errorMessage = 'Invalid token format - please log in again';
+                } else if (error.message.includes('invalid signature')) {
+                    errorMessage = 'Invalid token signature - please log in again';
+                } else if (error.message.includes('malformed')) {
+                    errorMessage = 'Malformed token - please log in again';
+                }
+            } else if (error.name === 'TokenExpiredError') {
+                errorMessage = 'Token expired - please log in again';
+            }
+            
             return {
                 success: false,
-                error: 'Invalid token'
+                error: errorMessage
             };
         }
     }

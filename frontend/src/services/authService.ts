@@ -93,7 +93,18 @@ export const logoutUser = async (): Promise<boolean> => {
 export const getCurrentUser = async (): Promise<UserProfile | null> => {
     try {
         const response = await apiCall('/me');
-        return response.success ? response.user : null;
+        if (response.success && response.user) {
+            return response.user;
+        }
+        
+        // Handle specific auth errors more gracefully
+        if (response.error && response.error.includes('No authentication token')) {
+            console.log('No auth token found, user needs to login');
+        } else if (response.error && response.error.includes('Invalid authentication token')) {
+            console.log('Invalid auth token, user needs to re-login');
+        }
+        
+        return null;
     } catch (error) {
         console.error('Error getting current user:', error);
         return null;

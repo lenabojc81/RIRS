@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Navbar from "./components/navbar/Navbar";
 import { AuthProvider } from "../contexts/AuthContext";
+import CookieNotice from "../components/CookieNotice";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -40,6 +41,7 @@ export default function RootLayout({
         <AuthProvider>
           <Navbar />
           <main>{children}</main>
+          <CookieNotice />
         </AuthProvider>
       </body>
     </html>

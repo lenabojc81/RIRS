@@ -43,37 +43,10 @@ const Navbar: React.FC = () => {
                                     <span className="spinner-border spinner-border-sm" role="status"></span>
                                 </div>
                             ) : user ? (
-                                <div className="nav-item dropdown">
-                                    <a 
-                                        className="nav-link dropdown-toggle"
-                                        href="#"
-                                        id="userDropdown"
-                                        role="button"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false"
-                                    >
-                                        <i className="bi bi-person-circle me-1"></i>
-                                        {user.username}
-                                    </a>
-                                    <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                        <li>
-                                            <span className="dropdown-item-text">
-                                                <small className="text-muted">Signed in as</small><br/>
-                                                <strong>{user.username}</strong>
-                                            </span>
-                                        </li>
-                                        <li><hr className="dropdown-divider" /></li>
-                                        <li>
-                                            <button 
-                                                className="dropdown-item"
-                                                onClick={handleLogout}
-                                            >
-                                                <i className="bi bi-box-arrow-right me-2"></i>
-                                                Sign out
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </div>
+                                <Link href="/user" className="nav-link">
+                                    <i className="bi bi-person-circle me-1"></i>
+                                    {user.username}
+                                </Link>
                             ) : (
                                 <button 
                                     className="btn btn-outline-primary"

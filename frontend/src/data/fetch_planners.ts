@@ -7,6 +7,7 @@ export async function createPlanner(planner: IPlanner) {
     try {
         const response = await fetch(`${baseURL}/planner/createPlanner`, {
             method: 'POST',
+            credentials: 'include', // Include authentication cookies
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -30,6 +31,7 @@ export async function getPlanners() {
     try {
         const response = await fetch(`${baseURL}/planner/getUndonePlanners`, {
             method: 'GET',
+            credentials: 'include', // Include authentication cookies
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -53,6 +55,7 @@ export async function updatePlanner(planner: IPlanner) {
     try {
         const response = await fetch(`${baseURL}/planner/editPlanner/${planner.id}`, {
             method: 'PUT',
+            credentials: 'include', // Include authentication cookies
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -75,6 +78,7 @@ export async function deletePlanner(plannerId: string) {
     try {
         const response = await fetch(`${baseURL}/planner/deletePlanner/${plannerId}`, {
             method: 'DELETE',
+            credentials: 'include', // Include authentication cookies
             headers: {
                 'Content-Type': 'application/json',
             },

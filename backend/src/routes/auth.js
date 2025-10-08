@@ -125,9 +125,11 @@ router.get('/me', async (req, res) => {
         const verification = await AuthService.verifyToken(token);
         
         if (!verification.success) {
+            // Clear invalid cookie
+            res.clearCookie('authToken');
             return res.status(401).json({
                 success: false,
-                error: 'Invalid authentication token'
+                error: verification.error || 'Invalid authentication token'
             });
         }
 
@@ -172,9 +174,11 @@ router.put('/profile', async (req, res) => {
         const verification = await AuthService.verifyToken(token);
         
         if (!verification.success) {
+            // Clear invalid cookie
+            res.clearCookie('authToken');
             return res.status(401).json({
                 success: false,
-                error: 'Invalid authentication token'
+                error: verification.error || 'Invalid authentication token'
             });
         }
 

@@ -5,7 +5,9 @@ import { baseURL } from "../../global";
 
 export async function fetchTasks(): Promise<ITask[]> {
     try {
-        const response = await fetch(`${baseURL}/task/getTasks`);
+        const response = await fetch(`${baseURL}/task/getTasks`, {
+            credentials: 'include', // Include authentication cookies
+        });
         if (!response.ok) {
             console.error("Failed to fetch tasks:", response.statusText);
             return [];
@@ -18,19 +20,23 @@ export async function fetchTasks(): Promise<ITask[]> {
     }
 }
 
-export async function deleteTask(id: string): Promise<void> {
+export async function deleteTask(id: string): Promise<boolean> {
     try {
         const response = await fetch(`${baseURL}/task/deleteTask/${id}`, {
             method: 'Delete',
+            credentials: 'include', // Include authentication cookies
         });
 
         if (response.ok) {
-            window.location.reload();
+            return true;
         } else {
-            alert('Error: Failed to save task.');
+            alert('Error: Failed to delete task.');
+            return false;
         }
     } catch (error) {
         console.error(error);
+        alert('Error: An error occurred while deleting the task.');
+        return false;
     }
 }
 
@@ -38,6 +44,7 @@ export async function createTask(task: ITask) {
     try {
         const response = await fetch(`${baseURL}/task/createTask`, {
             method: 'POST',
+            credentials: 'include', // Include authentication cookies
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -62,6 +69,7 @@ export async function updateTask(task: ITask) {
         console.log("Sending task update:", JSON.stringify(task, null, 2)); // Debug log
         const response = await fetch(`${baseURL}/task/editTask/${task.id}`, {
             method: 'PUT',
+            credentials: 'include', // Include authentication cookies
             headers: {
                 'Content-Type': 'application/json',
             },

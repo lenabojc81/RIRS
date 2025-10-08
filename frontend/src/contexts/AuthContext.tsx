@@ -29,6 +29,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 await authManager.checkAuthState();
             } catch (error) {
                 console.error('Error initializing auth:', error);
+                // Don't automatically log out on initialization errors
+                // Let the user try to interact first
             } finally {
                 setLoading(false);
             }

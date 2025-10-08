@@ -19,8 +19,11 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
     }, [mode]);
 
     const handleDelete = async () => {
-        const data = await deleteTask(task.id!);
-        redirect('/tasks');
+        const success = await deleteTask(task.id!);
+        if (success) {
+            // Redirect to tasks page
+            window.location.href = '/tasks';
+        }
     };
 
     const handleEdit = async () => {
@@ -35,7 +38,8 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
         
         const success = await updateTask(updatedTask);
         if (success) {
-            window.location.reload();
+            // Close modal and let parent component handle refresh
+            window.location.href = '/tasks';
         }
     };
 
@@ -50,7 +54,8 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
         const success = await updateTask(updatedTask as ITask);
         console.log("Update success:", success); // Debug log
         if (success) {
-            window.location.reload();
+            // Close modal and let parent component handle refresh
+            window.location.href = '/tasks';
         }
     };
 
@@ -63,10 +68,9 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
             ok = await createTask(editedTask);
         }
         if (ok) {
-            window.location.reload();
+            // Redirect to tasks page without reload
+            window.location.href = '/tasks';
         }
-
-        redirect('/tasks');
     };
 
     const handleChange = (field: string, value: any) => {
