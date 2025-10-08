@@ -252,15 +252,15 @@ export default function UserPage() {
                                 </div>
 
                                 <div className="col-md-4">
-                                    <div className="card h-100 border-0 shadow-sm">
+                                    <div className="card h-100 border-0 shadow-sm cursor-pointer" onClick={() => router.push('/labels')}>
                                         <div className="card-body text-center p-4">
                                             <div className="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
                                                  style={{width: '60px', height: '60px'}}>
-                                                <i className="bi bi-trophy fs-4"></i>
+                                                <i className="bi bi-tags fs-4"></i>
                                             </div>
-                                            <h4 className="card-title">Goals Achieved</h4>
+                                            <h4 className="card-title">Task Labels</h4>
                                             <p className="card-text text-muted">
-                                                Celebrate your successes with completed goals and milestones.
+                                                Organize and categorize your tasks with custom labels and colors.
                                             </p>
                                         </div>
                                     </div>

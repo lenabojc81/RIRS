@@ -80,6 +80,16 @@ main {
   flex: 1;
 }
 
+/* Utility Classes */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-pointer:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
 /* @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

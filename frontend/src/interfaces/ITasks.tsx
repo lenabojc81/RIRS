@@ -6,7 +6,8 @@ export interface ITask {
     date_start: Date;
     date_done?: Date;
     assigned_to?: [string];
-    label?: string;
+    label?: string; // Kept for backward compatibility
+    labels?: string[]; // Array of label IDs
     estimated_time?: number;
     priority?: number; // 1-5 (1 = highest priority, 5 = lowest priority)
 }
@@ -19,6 +20,7 @@ export const initialTask: ITask = {
     date_done: undefined,
     assigned_to: [""],
     label: "",
+    labels: [],
     estimated_time: 0,
     priority: 3, // Default to medium priority
 };

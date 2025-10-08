@@ -4,6 +4,7 @@ import { SlTrash, SlPencil, SlCheck, SlRefresh } from "react-icons/sl";
 import { redirect } from "next/navigation";
 import { baseURL } from "../../../../global";
 import { createTask, deleteTask, updateTask } from "../../../data/fetch_tasks";
+import { fetchLabels, Label } from "../../../data/fetch_labels";
 
 interface TaskDetailsProps {
     task: ITask;
@@ -47,10 +48,38 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
 
     const [editedTask, setEditedTask] = React.useState<ITask>(sanitizeTask(task));
     const [currentMode, setCurrentMode] = React.useState(mode);
+    const [availableLabels, setAvailableLabels] = React.useState<Label[]>([]);
+    const [presetLabels] = React.useState<Label[]>([
+        { id: 'preset-1', name: 'Work', color: '#3b82f6' },
+        { id: 'preset-2', name: 'Personal', color: '#10b981' },
+        { id: 'preset-3', name: 'Urgent', color: '#ef4444' },
+        { id: 'preset-4', name: 'Health', color: '#f59e0b' },
+        { id: 'preset-5', name: 'Learning', color: '#8b5cf6' },
+        { id: 'preset-6', name: 'Shopping', color: '#ec4899' },
+        { id: 'preset-7', name: 'Finance', color: '#06b6d4' },
+        { id: 'preset-8', name: 'Home', color: '#84cc16' },
+    ]);
 
     React.useEffect(() => {
         setCurrentMode(mode);
     }, [mode]);
+
+    React.useEffect(() => {
+        // Fetch user labels and combine with preset labels
+        const loadLabels = async () => {
+            try {
+                const userLabels = await fetchLabels();
+                setAvailableLabels([...presetLabels, ...userLabels]);
+            } catch (error) {
+                console.error('Error fetching labels:', error);
+                // Fallback to just preset labels
+                setAvailableLabels(presetLabels);
+            }
+        };
+        
+        // Load labels for all modes (view, create, edit) since view mode needs them to display labels
+        loadLabels();
+    }, [currentMode, presetLabels]);
 
     const handleDelete = async () => {
         const success = await deleteTask(task.id!);
@@ -229,8 +258,111 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
                 </div>
             )} */}
 
-            {/* label */}
-
+            {/* labels */}
+            {currentMode === "view" && (task.labels && task.labels.length > 0) && (
+                <div className="mb-3">
+                    <strong>Labels: </strong>
+                    <div className="d-flex flex-wrap gap-2 mt-2">
+                        {task.labels.map((labelId) => {
+                            const label = availableLabels.find(l => l.id === labelId);
+                            if (!label) return null;
+                            return (
+                                <span 
+                                    key={labelId}
+                                    className="badge d-flex align-items-center"
+                                    style={{
+                                        backgroundColor: label.color,
+                                        color: '#fff',
+                                        fontSize: '0.8rem',
+                                        padding: '0.4rem 0.8rem'
+                                    }}
+                                >
+                                    <i className="bi bi-tag-fill me-1"></i>
+                                    {label.name}
+                                </span>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+            {(currentMode === "edit" || currentMode === "create") && (
+                <div className="mb-3">
+                    <strong>Labels</strong>
+                    <div className="mt-2">
+                        <div className="row g-2">
+                            {availableLabels.map((label) => {
+                                const isSelected = editedTask.labels?.includes(label.id) || false;
+                                return (
+                                    <div key={label.id} className="col-sm-6 col-md-4">
+                                        <div 
+                                            className={`card cursor-pointer border-2 ${isSelected ? 'border-primary' : 'border-light'}`}
+                                            onClick={() => {
+                                                const currentLabels = editedTask.labels || [];
+                                                if (isSelected) {
+                                                    // Remove label
+                                                    handleChange("labels", currentLabels.filter(id => id !== label.id));
+                                                } else {
+                                                    // Add label
+                                                    handleChange("labels", [...currentLabels, label.id]);
+                                                }
+                                            }}
+                                            style={{
+                                                transition: 'all 0.2s ease',
+                                                transform: isSelected ? 'scale(1.02)' : 'scale(1)'
+                                            }}
+                                        >
+                                            <div className="card-body p-2 d-flex align-items-center">
+                                                <div 
+                                                    className="rounded-circle me-2"
+                                                    style={{
+                                                        width: '20px',
+                                                        height: '20px',
+                                                        backgroundColor: label.color
+                                                    }}
+                                                ></div>
+                                                <small className="flex-grow-1">{label.name}</small>
+                                                {isSelected && (
+                                                    <i className="bi bi-check-circle-fill text-primary"></i>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        {availableLabels.length === 0 && (
+                            <div className="text-center py-3 text-muted">
+                                <i className="bi bi-tags display-6 mb-2"></i>
+                                <p className="mb-0">No labels available. Create some in your profile!</p>
+                            </div>
+                        )}
+                        {editedTask.labels && editedTask.labels.length > 0 && (
+                            <div className="mt-3">
+                                <small className="text-muted">Selected labels:</small>
+                                <div className="d-flex flex-wrap gap-2 mt-1">
+                                    {editedTask.labels.map((labelId) => {
+                                        const label = availableLabels.find(l => l.id === labelId);
+                                        if (!label) return null;
+                                        return (
+                                            <span 
+                                                key={labelId}
+                                                className="badge"
+                                                style={{
+                                                    backgroundColor: label.color,
+                                                    color: '#fff',
+                                                    fontSize: '0.7rem'
+                                                }}
+                                            >
+                                                {label.name}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* estimated_time */}
             {currentMode === "view" && task.estimated_time !== 0 && (

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { ITask } from "../../../interfaces/ITasks";
 import { SlArrowUpCircle, SlInfo, SlCheck } from "react-icons/sl";
 import { fetchTasks, updateTask } from "../../../data/fetch_tasks";
+import { fetchLabels, Label } from "../../../data/fetch_labels";
 import TaskViewModal from "../modals/taskViewModal";
 
 type SortOption = 'due_date' | 'created_last' | 'created_first' | 'priority' | 'alphabetical';
@@ -17,7 +18,21 @@ export default function TaskList() {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortBy, setSortBy] = useState<SortOption>('due_date');
     const [filterBy, setFilterBy] = useState<FilterOption>('all');
+    const [labelFilter, setLabelFilter] = useState<string>('all');
+    const [availableLabels, setAvailableLabels] = useState<Label[]>([]);
     const itemsPerPage = 10;
+
+    // Preset labels that come with the system
+    const presetLabels: Label[] = [
+        { id: 'preset-1', name: 'Work', color: '#3b82f6' },
+        { id: 'preset-2', name: 'Personal', color: '#10b981' },
+        { id: 'preset-3', name: 'Urgent', color: '#ef4444' },
+        { id: 'preset-4', name: 'Health', color: '#f59e0b' },
+        { id: 'preset-5', name: 'Learning', color: '#8b5cf6' },
+        { id: 'preset-6', name: 'Shopping', color: '#ec4899' },
+        { id: 'preset-7', name: 'Finance', color: '#06b6d4' },
+        { id: 'preset-8', name: 'Home', color: '#84cc16' },
+    ];
 
     // Helper function to safely convert dates
     const safeConvertDate = (date: any): Date | undefined => {
@@ -105,6 +120,23 @@ export default function TaskList() {
             default:
                 return tasks;
         }
+    };
+
+    // Label filtering function
+    const filterTasksByLabel = (tasks: ITask[], labelId: string): ITask[] => {
+        if (labelId === 'all') return tasks;
+        
+        return tasks.filter(task => {
+            // Check if task has the selected label
+            if (task.labels && task.labels.includes(labelId)) {
+                return true;
+            }
+            // For backward compatibility, also check the old label field
+            if (task.label && task.label === labelId) {
+                return true;
+            }
+            return false;
+        });
     };
 
     // Sorting function
@@ -199,13 +231,29 @@ export default function TaskList() {
         })();
     }, []);
 
-    // Apply filtering and sorting when tasks, sortBy, or filterBy change
+    // Fetch labels
     useEffect(() => {
-        const filtered = filterTasks(tasks, filterBy);
-        const sorted = sortTasks(filtered, sortBy);
+        const loadLabels = async () => {
+            try {
+                const userLabels = await fetchLabels();
+                setAvailableLabels([...presetLabels, ...userLabels]);
+            } catch (error) {
+                console.error('Error fetching labels:', error);
+                // Fallback to just preset labels
+                setAvailableLabels(presetLabels);
+            }
+        };
+        loadLabels();
+    }, []);
+
+    // Apply filtering and sorting when tasks, sortBy, filterBy, or labelFilter change
+    useEffect(() => {
+        const statusFiltered = filterTasks(tasks, filterBy);
+        const labelFiltered = filterTasksByLabel(statusFiltered, labelFilter);
+        const sorted = sortTasks(labelFiltered, sortBy);
         setFilteredTasks(sorted);
         setCurrentPage(1); // Reset to first page when filters change
-    }, [tasks, sortBy, filterBy]);
+    }, [tasks, sortBy, filterBy, labelFilter]);
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -259,7 +307,7 @@ export default function TaskList() {
             <div className="card mb-4 border-0 shadow-sm">
                 <div className="card-body">
                     <div className="row g-3 align-items-center">
-                        <div className="col-md-6">
+                        <div className="col-md-4">
                             <div className="d-flex align-items-center">
                                 <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center me-3" 
                                      style={{width: '40px', height: '40px'}}>
@@ -284,7 +332,31 @@ export default function TaskList() {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-6">
+                        <div className="col-md-4">
+                            <div className="d-flex align-items-center">
+                                <div className="bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center me-3" 
+                                     style={{width: '40px', height: '40px'}}>
+                                    <i className="bi bi-tags fs-6"></i>
+                                </div>
+                                <div>
+                                    <h6 className="mb-1">Filter by Label</h6>
+                                    <select 
+                                        className="form-select form-select-sm"
+                                        value={labelFilter}
+                                        onChange={(e) => setLabelFilter(e.target.value)}
+                                        style={{minWidth: '150px'}}
+                                    >
+                                        <option value="all">All Labels</option>
+                                        {availableLabels.map((label) => (
+                                            <option key={label.id} value={label.id}>
+                                                {label.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-md-4">
                             <div className="d-flex align-items-center">
                                 <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center me-3" 
                                      style={{width: '40px', height: '40px'}}>
@@ -317,6 +389,12 @@ export default function TaskList() {
                                 {filterBy !== 'all' && (
                                     <span className="badge bg-info ms-2">
                                         {filterBy.replace('_', ' ').toUpperCase()}
+                                    </span>
+                                )}
+                                {labelFilter !== 'all' && (
+                                    <span className="badge bg-warning text-dark ms-2">
+                                        <i className="bi bi-tag me-1"></i>
+                                        {availableLabels.find(l => l.id === labelFilter)?.name || 'Unknown Label'}
                                     </span>
                                 )}
                             </span>
@@ -415,11 +493,28 @@ export default function TaskList() {
                                                 <i className="bi bi-calendar-week me-1"></i>This Week
                                             </span>
                                         )}
-                                        {/* Priority Badge */}
-                                        {task.priority && task.priority <= 2 && (
-                                            <span className={`badge ms-1 ${task.priority === 1 ? 'bg-danger' : 'bg-warning text-dark'}`} style={{fontSize: '0.6rem'}}>
-                                                {task.priority === 1 ? '🔴 Critical' : '🟠 High'}
-                                            </span>
+                                        {/* Label Badges */}
+                                        {task.labels && task.labels.length > 0 && (
+                                            <div className="d-flex flex-wrap gap-1 ms-1">
+                                                {task.labels.map((labelId: string, index: number) => {
+                                                    const label = availableLabels.find(l => l.id === labelId);
+                                                    if (!label) return null;
+                                                    return (
+                                                        <span 
+                                                            key={index}
+                                                            className="badge"
+                                                            style={{
+                                                                backgroundColor: label.color,
+                                                                color: '#fff',
+                                                                fontSize: '0.55rem',
+                                                                fontWeight: '500'
+                                                            }}
+                                                        >
+                                                            {label.name}
+                                                        </span>
+                                                    );
+                                                })}
+                                            </div>
                                         )}
                                     </div>
                                     <p className="card-text mb-0 text-muted small">{task.label}</p>

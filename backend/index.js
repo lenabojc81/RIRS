@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import taskRouter from './src/task.js';
 import plannerRouter from './src/planner.js';
 import authRouter from './src/routes/auth.js';
+import labelsRouter from './src/labels.js';
 import cors from 'cors';
 // Firebase will be initialized in the auth service
 
@@ -23,6 +24,7 @@ app.use(cors({
 app.use('/task', taskRouter);
 app.use('/planner', plannerRouter);
 app.use('/auth', authRouter);
+app.use('/labels', labelsRouter);
 
 const server = app.listen(port, () => {
   console.log(`Server listening on http://localhost:${port}`);
