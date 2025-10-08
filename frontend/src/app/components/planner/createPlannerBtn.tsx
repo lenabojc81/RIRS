@@ -1,23 +1,23 @@
 "use client";
 
 import React from 'react';
-import TaskViewModal from '../modals/taskViewModal';
-import { initialTask } from '@/interfaces/ITasks';
+import PlannerViewModal from '../modals/plannerViewModal';
+import { initialPlanner } from '@/interfaces/IPlanner';
 
-const CreateNewBtn: React.FC = () => {
+const CreatePlannerBtn: React.FC = () => {
     const [showModal, setShowModal] = React.useState(false);
 
     return (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
             <button className="btn btn-primary m-3" onClick={() => setShowModal(true)}>
-                New Task
+                New Planner
             </button>
 
             {showModal && (
-                <TaskViewModal task={initialTask} setShowModal={setShowModal} mode="create" />
+                <PlannerViewModal planner={initialPlanner} setShowModal={setShowModal} mode='create' />
             )}
         </div>
     );
 };
 
-export default CreateNewBtn;
+export default CreatePlannerBtn;

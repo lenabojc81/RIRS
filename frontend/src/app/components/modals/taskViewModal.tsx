@@ -4,10 +4,11 @@ import TaskDetails from "../tasks/taskDetails";
 
 interface TaskModalProps {
     task: ITask,
+    mode: string,
     setShowModal: (show: boolean) => void
 }
 
-export default function TaskViewModal({ task, setShowModal }: TaskModalProps) {
+export default function TaskViewModal({ task, setShowModal, mode }: TaskModalProps) {
     return (
         <div
             className="modal show d-block"
@@ -17,7 +18,9 @@ export default function TaskViewModal({ task, setShowModal }: TaskModalProps) {
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title">Task Details</h5>
+                        {mode === "edit" && <h5 className="modal-title">Edit Task</h5>}
+                        {mode === "view" && <h5 className="modal-title">View Task</h5>}
+                        {mode === "create" && <h5 className="modal-title">Create Task</h5>}
                         <button
                             type="button"
                             className="btn-close"
@@ -26,7 +29,7 @@ export default function TaskViewModal({ task, setShowModal }: TaskModalProps) {
                         ></button>
                     </div>
                     <div className="modal-body">
-                        <TaskDetails task={task} mode="view" />
+                        <TaskDetails task={task} mode={mode} />
                     </div>
                 </div>
             </div>

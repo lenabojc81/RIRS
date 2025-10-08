@@ -1,12 +1,14 @@
-import { initialTask, ITask } from "@/interfaces/ITasks";
+import { IPlanner } from "@/interfaces/IPlanner";
 import React from "react";
-import TaskDetails from "../tasks/taskDetails";
+import CreatePlannerElements from "../elements/createPlannerElements";
 
-interface TaskModalProps {
+interface PlannerModalProps {
+    planner: IPlanner;
+    mode: string;
     setShowModal: (show: boolean) => void
 }
 
-export default function TaskCreateModal({ setShowModal }: TaskModalProps) {
+export default function PlannerViewModal({ planner, setShowModal, mode }: PlannerModalProps) {
     return (
         <div
             className="modal show d-block"
@@ -16,7 +18,11 @@ export default function TaskCreateModal({ setShowModal }: TaskModalProps) {
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title">Create Task</h5>
+                        {mode === "create" ?
+                            <h5 className="modal-title">Create Planner</h5>
+                            : 
+                            <h5 className="modal-title">View Planner</h5>
+                        }
                         <button
                             type="button"
                             className="btn-close"
@@ -25,7 +31,7 @@ export default function TaskCreateModal({ setShowModal }: TaskModalProps) {
                         ></button>
                     </div>
                     <div className="modal-body">
-                        <TaskDetails task={initialTask} mode="create" />
+                        <CreatePlannerElements planner={planner} />
                     </div>
                 </div>
             </div>

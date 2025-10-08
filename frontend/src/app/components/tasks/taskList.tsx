@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { ITask } from "../../../interfaces/ITasks";
-import { SlArrowUpCircle, SlInfo } from "react-icons/sl";
-import { fetchTasks } from "../../../data/fetch_tasks";
+import { SlArrowUpCircle, SlInfo, SlCheck } from "react-icons/sl";
+import { fetchTasks, updateTask } from "../../../data/fetch_tasks";
 import TaskViewModal from "../modals/taskViewModal";
 
 export default function TaskList() {
@@ -36,18 +36,66 @@ export default function TaskList() {
         setSelectedTask(null);
     };
 
+    const handleToggleTaskStatus = async (task: ITask) => {
+        let updatedTask: any;
+        
+        if (task.date_done) {
+            // Task is completed, reopen it
+            updatedTask = {
+                ...task,
+                date_done: null as any // Set to null to clear the field
+            };
+        } else {
+            // Task is not completed, mark as done
+            updatedTask = {
+                ...task,
+                date_done: new Date()
+            };
+        }
+
+        const success = await updateTask(updatedTask as ITask);
+        if (success) {
+            // Update the local tasks state to reflect the change immediately
+            setTasks(prevTasks => 
+                prevTasks.map(t => 
+                    t.id === task.id 
+                        ? { ...t, date_done: updatedTask.date_done === null ? undefined : updatedTask.date_done }
+                        : t
+                )
+            );
+        }
+    };
+
     return (
         <div className="container">
             <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3">
                 {currentTasks.map((task, idx) => (
                     <div key={task.id ?? `task-${idx}`} className="col">
-                        <div className="d-flex align-items-center p-3 border rounded bg-light">
+                        <div className={`d-flex align-items-center p-3 border rounded ${task.date_done ? 'bg-success bg-opacity-10 border-success' : 'bg-light'}`}>
                             <div className="me-3">
-                                <SlArrowUpCircle size={40} className="text-success" />
+                                <button
+                                    className="btn btn-link p-0"
+                                    onClick={() => handleToggleTaskStatus(task)}
+                                    aria-label={task.date_done ? "Mark as undone" : "Mark as done"}
+                                    title={task.date_done ? "Click to reopen task" : "Click to mark as complete"}
+                                >
+                                    {task.date_done ? (
+                                        <SlCheck size={40} className="text-success" />
+                                    ) : (
+                                        <SlArrowUpCircle size={40} className="text-success" />
+                                    )}
+                                </button>
                             </div>
                             <div className="transactionDetails flex-grow-1">
-                                <p className="transactionName mb-1 fw-bold">{task.name}</p>
+                                <p className={`transactionName mb-1 fw-bold ${task.date_done ? 'text-decoration-line-through text-muted' : ''}`}>
+                                    {task.name}
+                                </p>
                                 <p className="transactionAmount mb-0 text-muted">{task.label}</p>
+                                {/* {task.date_done && (
+                                    <p className="mb-0 text-success small">
+                                        <strong>Completed:</strong> {new Date(task.date_done).toLocaleDateString()}
+                                    </p>
+                                )} */}
                             </div>
                             <p className="transactionDate text-muted ms-3 mb-0">
                                 {new Date(task.date_start).toLocaleDateString()}
@@ -103,7 +151,7 @@ export default function TaskList() {
             </nav>
 
             {showModal && selectedTask && (
-                <TaskViewModal task={selectedTask} setShowModal={setShowModal} />
+                <TaskViewModal task={selectedTask} setShowModal={setShowModal} mode="view" />
             )}
         </div>
     );

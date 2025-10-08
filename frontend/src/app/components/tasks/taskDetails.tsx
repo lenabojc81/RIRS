@@ -1,6 +1,6 @@
 import React from "react";
 import { ITask } from "../../../interfaces/ITasks";
-import { SlTrash, SlPencil } from "react-icons/sl";
+import { SlTrash, SlPencil, SlCheck, SlRefresh } from "react-icons/sl";
 import { redirect } from "next/navigation";
 import { baseURL } from "../../../../global";
 import { createTask, deleteTask, updateTask } from "../../../data/fetch_tasks";
@@ -11,7 +11,6 @@ interface TaskDetailsProps {
 }
 
 const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
-    const [isEditing, setIsEditing] = React.useState(false);
     const [editedTask, setEditedTask] = React.useState<ITask>(task);
     const [currentMode, setCurrentMode] = React.useState(mode);
 
@@ -26,7 +25,33 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
 
     const handleEdit = async () => {
         setCurrentMode("edit");
-        setIsEditing(true);
+    };
+
+    const handleMarkAsDone = async () => {
+        const updatedTask = {
+            ...task,
+            date_done: new Date()
+        };
+        
+        const success = await updateTask(updatedTask);
+        if (success) {
+            window.location.reload();
+        }
+    };
+
+    const handleReopen = async () => {
+        // Send the task with date_done explicitly set to null for the API
+        const updatedTask = {
+            ...task,
+            date_done: null as any // Explicitly null to clear the field in the database
+        };
+        
+        console.log("Reopening task:", updatedTask); // Debug log
+        const success = await updateTask(updatedTask as ITask);
+        console.log("Update success:", success); // Debug log
+        if (success) {
+            window.location.reload();
+        }
     };
 
     const handleSave = async () => {
@@ -38,7 +63,6 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
             ok = await createTask(editedTask);
         }
         if (ok) {
-            setIsEditing(false);
             window.location.reload();
         }
 
@@ -54,6 +78,8 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
 
     return (
         <div className="container mt-4">
+
+            {/* name */}
             {currentMode === "view" && (
                 <h2>{task.name.toUpperCase()}</h2>
             )}
@@ -69,6 +95,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
                 </div>
             )}
 
+            {/* date_end */}
             {(currentMode === "view" && task.date_end !== undefined) && (
                 <p>
                     <strong>Due date: </strong>
@@ -93,6 +120,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
                 </div>
             )}
 
+            {/* date_done */}
             {(currentMode === "view" && task.date_done !== undefined) && (
                 <p>
                     <strong>Completed date: </strong>
@@ -119,6 +147,8 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
 
             {/* label */}
 
+
+            {/* estimated_time */}
             {currentMode === "view" && task.estimated_time !== 0 && (
                 <p>
                     <strong>Expected duration: </strong>
@@ -143,6 +173,8 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
 
             {/* planner */}
 
+
+            {/* description */}
             {currentMode === "view" && task.description !== "" && (
                 <p>
                     <strong>Description: </strong>
@@ -167,7 +199,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
                         </button>
                 ) : (
                     <>
-                        <div className="col-4 d-flex justify-content-center ">
+                        <div className="col-3 d-flex justify-content-center">
                             <button
                                 className="btn btn-link text-secondary"
                                 onClick={() => handleEdit()}
@@ -176,7 +208,29 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
                                 <SlPencil size={24} />
                             </button>
                         </div>
-                        <div className="col-4 d-flex justify-content-center">
+                        {/* Show Mark as Done button for incomplete tasks, Reopen button for completed tasks */}
+                        {!task.date_done ? (
+                            <div className="col-3 d-flex justify-content-center">
+                                <button
+                                    className="btn btn-link text-success"
+                                    onClick={handleMarkAsDone}
+                                    aria-label="Mark as Done"
+                                >
+                                    <SlCheck size={24} />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="col-3 d-flex justify-content-center">
+                                <button
+                                    className="btn btn-link text-warning"
+                                    onClick={handleReopen}
+                                    aria-label="Reopen Task"
+                                >
+                                    <SlRefresh size={24} />
+                                </button>
+                            </div>
+                        )}
+                        <div className="col-3 d-flex justify-content-center">
                             <button
                                 className="btn btn-link text-danger"
                                 onClick={() => handleDelete()}
