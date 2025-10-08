@@ -8,6 +8,7 @@ export interface ITask {
     assigned_to?: [string];
     label?: string;
     estimated_time?: number;
+    priority?: number; // 1-5 (1 = highest priority, 5 = lowest priority)
 }
 
 export const initialTask: ITask = {
@@ -19,4 +20,5 @@ export const initialTask: ITask = {
     assigned_to: [""],
     label: "",
     estimated_time: 0,
+    priority: 3, // Default to medium priority
 };

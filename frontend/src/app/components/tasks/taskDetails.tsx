@@ -167,6 +167,40 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
                 </div>
             )}
 
+            {/* priority */}
+            {currentMode === "view" && (
+                <p>
+                    <strong>Priority: </strong>
+                    {(() => {
+                        const priority = task.priority || 3;
+                        switch (priority) {
+                            case 1: return "🔴 Critical (1)";
+                            case 2: return "🟠 High (2)";
+                            case 3: return "🟡 Medium (3)";
+                            case 4: return "🟢 Low (4)";
+                            case 5: return "🔵 Very Low (5)";
+                            default: return "🟡 Medium (3)";
+                        }
+                    })()}
+                </p>
+            )}
+            {(currentMode === "edit" || currentMode === "create") && (
+                <div className="mb-3">
+                    <strong>Priority</strong>
+                    <select
+                        value={editedTask.priority || 3}
+                        onChange={(e) => handleChange("priority", parseInt(e.target.value))}
+                        className="form-control mb-2"
+                    >
+                        <option value={1}>🔴 Critical (1) - Highest Priority</option>
+                        <option value={2}>🟠 High (2) - High Priority</option>
+                        <option value={3}>🟡 Medium (3) - Medium Priority</option>
+                        <option value={4}>🟢 Low (4) - Low Priority</option>
+                        <option value={5}>🔵 Very Low (5) - Lowest Priority</option>
+                    </select>
+                </div>
+            )}
+
             {/* date_done */}
             {(currentMode === "view" && task.date_done !== undefined && task.date_done !== null) && (
                 <p>

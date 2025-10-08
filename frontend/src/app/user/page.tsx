@@ -52,57 +52,68 @@ export default function UserPage() {
                     {user && (
                         <>
                             {/* Profile Information */}
-                            <div className="row g-4 mb-5">
+                            <div className="row g-4 mb-5 justify-content-center">
                                 <div className="col-12">
                                     <h2 className="display-6 fw-bold mb-4 text-center">Profile Information</h2>
                                 </div>
                                 
-                                <div className="col-md-6 col-lg-4">
-                                    <div className="card h-100 border-0 shadow-sm">
-                                        <div className="card-body text-center p-4">
-                                            <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                                 style={{width: '60px', height: '60px'}}>
-                                                <i className="bi bi-person fs-4"></i>
-                                            </div>
-                                            <h4 className="card-title">Username</h4>
-                                            <p className="card-text h5 text-primary">{user.username}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="col-md-6 col-lg-4">
-                                    <div className="card h-100 border-0 shadow-sm">
-                                        <div className="card-body text-center p-4">
-                                            <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                                 style={{width: '60px', height: '60px'}}>
-                                                <i className="bi bi-envelope fs-4"></i>
-                                            </div>
-                                            <h4 className="card-title">Email Address</h4>
-                                            <p className="card-text h6 text-success">{user.email}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {user.createdAt && (
-                                    <div className="col-md-6 col-lg-4">
-                                        <div className="card h-100 border-0 shadow-sm">
-                                            <div className="card-body text-center p-4">
-                                                <div className="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                                     style={{width: '60px', height: '60px'}}>
-                                                    <i className="bi bi-calendar-plus fs-4"></i>
+                                {/* Main Profile Card */}
+                                <div className="col-lg-8">
+                                    <div className="card border-0 shadow-lg">
+                                        <div className="card-body p-5">
+                                            <div className="row align-items-center">
+                                                {/* Profile Avatar */}
+                                                <div className="col-md-4 text-center mb-4 mb-md-0">
+                                                    <div className="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg" 
+                                                         style={{width: '120px', height: '120px'}}>
+                                                        <i className="bi bi-person-fill text-white" style={{fontSize: '4rem'}}></i>
+                                                    </div>
+                                                    <h3 className="mt-3 mb-1 text-primary fw-bold">{user.username}</h3>
+                                                    <p className="text-muted mb-0">TaskTracker User</p>
                                                 </div>
-                                                <h4 className="card-title">Member Since</h4>
-                                                <p className="card-text h6 text-info">
-                                                    {new Date(user.createdAt).toLocaleDateString('en-US', {
-                                                        year: 'numeric',
-                                                        month: 'long',
-                                                        day: 'numeric'
-                                                    })}
-                                                </p>
+                                                
+                                                {/* Profile Details */}
+                                                <div className="col-md-8">
+                                                    <div className="row g-3">
+                                                        <div className="col-12">
+                                                            <div className="d-flex align-items-center p-3 bg-light rounded-3">
+                                                                <div className="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                                                     style={{width: '40px', height: '40px'}}>
+                                                                    <i className="bi bi-envelope fs-6"></i>
+                                                                </div>
+                                                                <div>
+                                                                    <h6 className="mb-0 text-success">Email Address</h6>
+                                                                    <p className="mb-0 text-muted">{user.email}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {user.createdAt && (
+                                                            <div className="col-12">
+                                                                <div className="d-flex align-items-center p-3 bg-light rounded-3">
+                                                                    <div className="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                                                         style={{width: '40px', height: '40px'}}>
+                                                                        <i className="bi bi-calendar-plus fs-6"></i>
+                                                                    </div>
+                                                                    <div>
+                                                                        <h6 className="mb-0 text-info">Member Since</h6>
+                                                                        <p className="mb-0 text-muted">
+                                                                            {new Date(user.createdAt).toLocaleDateString('en-US', {
+                                                                                year: 'numeric',
+                                                                                month: 'long',
+                                                                                day: 'numeric'
+                                                                            })}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                )}
+                                </div>
                             </div>
 
                             {/* Quick Actions */}

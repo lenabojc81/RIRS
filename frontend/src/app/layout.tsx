@@ -4,6 +4,7 @@ import "./globals.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Navbar from "./components/navbar/Navbar";
+import Footer from "./components/footer/Footer";
 import { AuthProvider } from "../contexts/AuthContext";
 import CookieNotice from "../components/CookieNotice";
 
@@ -39,9 +40,12 @@ export default function RootLayout({
       >
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossOrigin="anonymous"></script>
         <AuthProvider>
-          <Navbar />
-          <main>{children}</main>
-          <CookieNotice />
+          <div className="d-flex flex-column min-vh-100">
+            <Navbar />
+            <main className="flex-grow-1">{children}</main>
+            <Footer />
+            <CookieNotice />
+          </div>
         </AuthProvider>
       </body>
     </html>
