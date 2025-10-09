@@ -137,6 +137,58 @@ router.put('/editPlanner/:id', authenticateUser, async (req, res) => {
     }
 });
 
+// Get all planners for the authenticated user
+router.get('/getAllPlanners', authenticateUser, async (req, res) => {
+    try {
+        const userDocRef = doc(database, 'users', req.user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const userData = userDoc.data();
+        let planners = userData.planners || [];
+        
+        // Migration: Ensure all planners have IDs
+        let needsUpdate = false;
+        planners = planners.map(planner => {
+            if (!planner.id) {
+                needsUpdate = true;
+                return { ...planner, id: generateUniqueId() };
+            }
+            return planner;
+        });
+        
+        // If planners were updated with IDs, save them back to the database
+        if (needsUpdate) {
+            await updateDoc(userDocRef, {
+                planners: planners,
+                updatedAt: new Date()
+            });
+            console.log(`Added IDs to planners for user: ${req.user.uid}`);
+        }
+        
+        // Sort planners by date_start descending (newest first)
+        planners.sort((a, b) => {
+            const dateA = new Date(a.date_start.toDate ? a.date_start.toDate() : a.date_start);
+            const dateB = new Date(b.date_start.toDate ? b.date_start.toDate() : b.date_start);
+            
+            if (dateB.getTime() !== dateA.getTime()) {
+                return dateB.getTime() - dateA.getTime(); // Newest first
+            }
+            
+            return (a.title || '').localeCompare(b.title || '');
+        });
+        
+        console.log(`Successfully fetched ${planners.length} planners (all) for user:`, req.user.uid);
+        res.status(200).json(planners);
+    } catch (err) {
+        console.error('Error fetching all planners:', err);
+        res.status(500).json({ error: 'Failed to fetch planners', details: err.message });
+    }
+});
+
 // Get all undone planners for the authenticated user
 router.get('/getUndonePlanners', authenticateUser, async (req, res) => {
     try {

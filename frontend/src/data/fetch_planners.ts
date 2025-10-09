@@ -54,6 +54,30 @@ export async function getPlanners() {
     }
 };
 
+export async function getAllPlanners() {
+    try {
+        const response = await fetch(`${baseURL}/planner/getAllPlanners`, {
+            method: 'GET',
+            credentials: 'include', // Include authentication cookies
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        if (response.status === 200) {
+            const data = await response.json();
+            console.log("Fetched all planners:", data);
+            return data;
+        } else {
+            alert('Error: Failed to fetch planners.');
+            return [];
+        }
+    } catch (error) {
+        alert('Error: An error occurred while fetching planners.');
+        console.error(error);
+        return [];
+    }
+};
+
 export async function updatePlanner(planner: IPlanner) {
     console.log("fetch_planners: updatePlanner called with:", planner);
     console.log("fetch_planners: Planner ID:", planner.id);

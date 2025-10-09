@@ -237,15 +237,15 @@ export default function UserPage() {
                                 </div>
 
                                 <div className="col-md-4">
-                                    <div className="card h-100 border-0 shadow-sm">
+                                    <div className="card h-100 border-0 shadow-sm cursor-pointer" onClick={() => router.push('/archived-planners')}>
                                         <div className="card-body text-center p-4">
-                                            <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                            <div className="bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
                                                  style={{width: '60px', height: '60px'}}>
-                                                <i className="bi bi-target fs-4"></i>
+                                                <i className="bi bi-archive fs-4"></i>
                                             </div>
-                                            <h4 className="card-title">Active Planners</h4>
+                                            <h4 className="card-title">Archived Planners</h4>
                                             <p className="card-text text-muted">
-                                                Monitor your goal-oriented planners and milestone achievements.
+                                                View your completed planners and their achieved goals.
                                             </p>
                                         </div>
                                     </div>

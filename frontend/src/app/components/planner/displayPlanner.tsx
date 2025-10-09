@@ -1,6 +1,6 @@
 "use client";
 
-import { getPlanners, updatePlanner, deletePlanner } from "@/data/fetch_planners";
+import { getPlanners, getAllPlanners, updatePlanner, deletePlanner } from "@/data/fetch_planners";
 import { initialPlanner, IPlanner } from "@/interfaces/IPlanner";
 import React from "react";
 import PlannerDetails from "./plannerDetails";
@@ -8,7 +8,11 @@ import GoalListElement from "../elements/goalListElement";
 import AddGoalBtnInput from "../elements/addGoalBtnInput";
 import MilestoneGoals from "./milestoneGoals";
 
-export default function DisplayPlanner() {
+interface DisplayPlannerProps {
+    archived?: boolean;
+}
+
+export default function DisplayPlanner({ archived = false }: DisplayPlannerProps) {
     const [selectedPlanner, setSelectedPlanner] = React.useState<IPlanner | null>(null);
     const [planners, setPlanners] = React.useState<IPlanner[]>([]);
 
@@ -53,21 +57,28 @@ export default function DisplayPlanner() {
     React.useEffect(() => {
         async function fetchData() {
             try {
-                const plannersFromDb = await getPlanners();
+                // Use getAllPlanners when we need both active and archived, getPlanners for active only
+                const plannersFromDb = archived ? await getAllPlanners() : await getPlanners();
                 console.log("Raw planners from DB:", plannersFromDb);
                 
                 // Sanitize all planners to ensure proper date handling
                 const sanitizedPlanners = plannersFromDb.map(sanitizePlanner);
                 console.log("Sanitized planners:", sanitizedPlanners);
                 
-                setPlanners(sanitizedPlanners);
+                // Filter planners based on archived prop (only needed for archived since backend handles active filtering)
+                const filteredPlanners = archived 
+                    ? sanitizedPlanners.filter((planner: IPlanner) => isPlannerCompleted(planner))
+                    : sanitizedPlanners; // For active planners, backend already filters
+                
+                console.log(archived ? "Archived planners:" : "Active planners:", filteredPlanners);
+                setPlanners(filteredPlanners);
             } catch (error) {
                 console.error("Error fetching planners:", error);
                 setPlanners([]);
             }
         }
         fetchData();
-    }, []);
+    }, [archived]);
 
     React.useEffect(() => {
         if (selectedPlanner) {
@@ -253,29 +264,54 @@ export default function DisplayPlanner() {
                                  style={{width: '60px', height: '60px'}}>
                                 <i className="bi bi-list-ul fs-4"></i>
                             </div>
-                            <h3 className="card-title mb-3">Select a Planner</h3>
-                            <p className="text-muted mb-3">Choose from your existing planners to view and manage</p>
-                            <select
-                                className="form-select form-select-lg mx-auto shadow-sm"
-                                value={selectedPlanner?.id ?? (planners[0]?.id ?? "")}
-                                onChange={(e) => {
-                                    const planner = planners.find(p => p.id === e.target.value);
-                                    setSelectedPlanner(planner ?? null);
-                                }}
-                                style={{
-                                    width: selectedPlanner
-                                        ? `calc(${selectedPlanner.title.length}ch + 60px)`
-                                        : "auto",
-                                    minWidth: "200px",
-                                    maxWidth: "400px"
-                                }}
-                            >
-                                {planners.map((planner) => (
-                                    <option key={planner.id} value={planner.id}>
-                                        {planner.title}
-                                    </option>
-                                ))}
-                            </select>
+                            <h3 className="card-title mb-3">
+                                {archived ? "Select an Archived Planner" : "Select a Planner"}
+                            </h3>
+                            <p className="text-muted mb-3">
+                                {archived 
+                                    ? "Choose from your completed planners to view their details"
+                                    : "Choose from your existing planners to view and manage"
+                                }
+                            </p>
+                            {planners.length > 0 ? (
+                                <select
+                                    className="form-select form-select-lg mx-auto shadow-sm"
+                                    value={selectedPlanner?.id ?? (planners[0]?.id ?? "")}
+                                    onChange={(e) => {
+                                        const planner = planners.find(p => p.id === e.target.value);
+                                        setSelectedPlanner(planner ?? null);
+                                    }}
+                                    style={{
+                                        width: selectedPlanner
+                                            ? `calc(${selectedPlanner.title.length}ch + 60px)`
+                                            : "auto",
+                                        minWidth: "200px",
+                                        maxWidth: "400px"
+                                    }}
+                                >
+                                    {planners.map((planner) => (
+                                        <option key={planner.id} value={planner.id}>
+                                            {planner.title}
+                                        </option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <div className="text-center py-4">
+                                    <i className={`bi ${archived ? 'bi-archive' : 'bi-journal-x'} display-4 text-muted mb-3`}></i>
+                                    <h5 className="text-muted">
+                                        {archived 
+                                            ? "No Archived Planners Found" 
+                                            : "No Active Planners Found"
+                                        }
+                                    </h5>
+                                    <p className="text-muted mb-0">
+                                        {archived 
+                                            ? "You haven't completed any planners yet. Complete some planners to see them here!"
+                                            : "Create your first planner to get started with goal tracking."
+                                        }
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -289,11 +325,21 @@ export default function DisplayPlanner() {
                     
                     {/* Show read-only notice for completed planners */}
                     {isPlannerCompleted(selectedPlanner) && (
-                        <div className="alert alert-info mt-3" role="alert">
+                        <div className={`alert ${archived ? 'alert-success' : 'alert-info'} mt-3`} role="alert">
                             <div className="d-flex align-items-center">
-                                <i className="bi bi-info-circle-fill me-2"></i>
-                                <strong>This planner is completed and cannot be edited.</strong>
-                                <span className="ms-2">All editing features are disabled for completed planners.</span>
+                                <i className={`bi ${archived ? 'bi-check-circle-fill' : 'bi-info-circle-fill'} me-2`}></i>
+                                <strong>
+                                    {archived 
+                                        ? 'This planner has been completed! 🎉' 
+                                        : 'This planner is completed and cannot be edited.'
+                                    }
+                                </strong>
+                                <span className="ms-2">
+                                    {archived 
+                                        ? 'View your achievements and completed goals below.' 
+                                        : 'All editing features are disabled for completed planners.'
+                                    }
+                                </span>
                             </div>
                         </div>
                     )}
