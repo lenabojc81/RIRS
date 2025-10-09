@@ -1,18 +1,49 @@
 import React from "react";
 import { IGoal, IPlanner } from "@/interfaces/IPlanner";
+import { ITask } from "@/interfaces/ITasks";
 import { SlClose, SlLock, SlPaperPlane, SlPencil, SlStar, SlTrash, SlCheck } from "react-icons/sl";
 import { redirect, useRouter } from "next/navigation";
 import { createPlanner, updatePlanner } from "@/data/fetch_planners";
 import GoalListElement from "../elements/goalListElement";
+import AddGoalBtnInput from "../elements/addGoalBtnInput";
+import PlannerCalendar from "./plannerCalendar";
+import PlannerTaskList from "./plannerTaskList";
 
 interface PlannerDetailsProps {
     planner: IPlanner;
-    onPlannerUpdate?: (updatedPlanner: IPlanner) => void;
+    onPlannerUpdate: (planner: IPlanner) => Promise<void>;
+    onTaskUpdate: (tasks: ITask[]) => Promise<void>;
+    editedPlanner: IPlanner;
+    setEditedPlanner: (planner: IPlanner) => void;
+    onGoalAdded: (updatedPlanner: IPlanner) => void;
+    handleEdit: (goalIndex: number) => void;
+    handleDelete: (goalText: string) => void;
+    handleSaveGoalEdit: (originalIndex: number) => void;
+    editingGoalIndex: number | null;
+    currentGoalText: string;
+    setCurrentGoalText: (text: string) => void;
+    setEditingGoalIndex: (index: number | null) => void;
 }
 
-export default function PlannerDetails({ planner, onPlannerUpdate }: PlannerDetailsProps) {
+
+
+export default function PlannerDetails({ 
+    planner, 
+    onPlannerUpdate, 
+    onTaskUpdate, 
+    editedPlanner, 
+    setEditedPlanner, 
+    onGoalAdded,
+    handleEdit,
+    handleDelete,
+    handleSaveGoalEdit,
+    editingGoalIndex,
+    currentGoalText,
+    setCurrentGoalText,
+    setEditingGoalIndex
+}: PlannerDetailsProps) {
     const [isEditing, setIsEditing] = React.useState(false);
-    const [editedPlanner, setEditedPlanner] = React.useState<IPlanner>(planner);
+
 
     // Helper function to safely convert dates
     const safeConvertDate = (date: any): Date | undefined => {
@@ -317,6 +348,59 @@ export default function PlannerDetails({ planner, onPlannerUpdate }: PlannerDeta
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            {/* Goal Management */}
+            <div className="col-12 mt-4">
+                <div className="card shadow-sm border-0">
+                    <div className="card-header bg-primary text-white">
+                        <h5 className="card-title mb-0">
+                            <SlStar className="me-2" />
+                            Goals
+                        </h5>
+                    </div>
+                    <div className="card-body">
+                        {editedPlanner && (
+                            <>
+                                <AddGoalBtnInput 
+                                    planner={editedPlanner} 
+                                    mode="edit"
+                                    category="main"
+                                    setEditedPlanner={setEditedPlanner} 
+                                    onGoalAdded={onGoalAdded}
+                                />
+                                <GoalListElement 
+                                    goals={editedPlanner.goals || []} 
+                                    category="main"
+                                    handleEdit={handleEdit}
+                                    handleDelete={handleDelete}
+                                    handleSaveGoalEdit={handleSaveGoalEdit}
+                                    editingGoalIndex={editingGoalIndex}
+                                    currentGoalText={currentGoalText}
+                                    setCurrentGoalText={setCurrentGoalText}
+                                    setEditingGoalIndex={setEditingGoalIndex}
+                                    readOnly={false}
+                                />
+                            </>
+                        )}
+                    </div>
+                </div>
+            </div>
+            
+            {/* Planner Task List */}
+            <div className="col-12 mt-4">
+                <PlannerTaskList 
+                    planner={planner} 
+                    onTaskUpdate={onTaskUpdate}
+                />
+            </div>
+            
+            {/* Calendar Component */}
+            <div className="col-12 mt-4">
+                <PlannerCalendar 
+                    planner={planner} 
+                    onTaskUpdate={onTaskUpdate}
+                />
             </div>
         </div>
     )

@@ -79,13 +79,9 @@ export async function getAllPlanners() {
 };
 
 export async function updatePlanner(planner: IPlanner) {
-    console.log("fetch_planners: updatePlanner called with:", planner);
-    console.log("fetch_planners: Planner ID:", planner.id);
     
     try {
         const url = `${baseURL}/planner/editPlanner/${planner.id}`;
-        console.log("fetch_planners: Making PUT request to:", url);
-        console.log("fetch_planners: Request body:", JSON.stringify(planner, null, 2));
         
         const response = await fetch(url, {
             method: 'PUT',
@@ -96,12 +92,8 @@ export async function updatePlanner(planner: IPlanner) {
             body: JSON.stringify(planner),
         })
 
-        console.log("fetch_planners: Response status:", response.status);
-        console.log("fetch_planners: Response headers:", response.headers);
-
         if (response.status === 200) {
             const data = await response.json();
-            console.log("fetch_planners: Response data:", data);
             return data.success;
         } else {
             const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));

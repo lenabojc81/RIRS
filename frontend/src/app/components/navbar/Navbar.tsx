@@ -36,6 +36,10 @@ const Navbar: React.FC = () => {
                     <div className="collapse navbar-collapse" id="navbarNav">
                         {user && (
                             <div className="navbar-nav me-auto ms-4">
+                                <Link href="/daily-tracker" className="nav-link text-white fw-medium px-3 py-2 rounded-pill mx-1 hover-bg-light">
+                                    <i className="bi bi-calendar-day me-2"></i>
+                                    Daily Tracker
+                                </Link>
                                 <Link href="/tasks" className="nav-link text-white fw-medium px-3 py-2 rounded-pill mx-1 hover-bg-light">
                                     <i className="bi bi-list-task me-2"></i>
                                     Tasks

@@ -22,9 +22,9 @@ export default function CookiePolicyPage() {
                             </p>
                         </div>
                         <div className="col-lg-4 text-center">
-                            <div className="bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg" 
-                                 style={{width: '120px', height: '120px'}}>
-                                <i className="bi bi-shield-check text-warning" style={{fontSize: '4rem'}}></i>
+                            <div className="bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg"
+                                style={{ width: '120px', height: '120px' }}>
+                                <i className="bi bi-shield-check text-warning" style={{ fontSize: '4rem' }}></i>
                             </div>
                         </div>
                     </div>
@@ -36,7 +36,7 @@ export default function CookiePolicyPage() {
                 <div className="container">
                     <div className="row">
                         <div className="col-lg-8 mx-auto">
-                            
+
                             {/* What Are Cookies */}
                             <div className="card mb-4 border-0 shadow-sm">
                                 <div className="card-body p-4">
@@ -46,7 +46,7 @@ export default function CookiePolicyPage() {
                                     </h3>
                                     <div className="card-text">
                                         <p>Cookies are small text files that are stored on your device (computer, tablet, or mobile) when you visit a website. They are widely used to make websites work more efficiently and provide information to website owners.</p>
-                                        
+
                                         <p>Cookies help us:</p>
                                         <ul>
                                             <li>Remember your preferences and settings</li>
@@ -71,7 +71,7 @@ export default function CookiePolicyPage() {
                                         Types of Cookies We Use
                                     </h3>
                                     <div className="card-text">
-                                        
+
                                         {/* Essential Cookies */}
                                         <div className="border-start border-success border-4 ps-3 mb-4">
                                             <h5 className="text-success">
@@ -155,7 +155,7 @@ export default function CookiePolicyPage() {
                                     </h3>
                                     <div className="card-text">
                                         <p>We use some third-party services that may set their own cookies:</p>
-                                        
+
                                         <div className="row">
                                             <div className="col-md-6">
                                                 <h5 className="text-primary">
@@ -203,22 +203,22 @@ export default function CookiePolicyPage() {
                                         Managing Your Cookie Preferences
                                     </h3>
                                     <div className="card-text">
-                                        
+
                                         <h5>Browser Settings</h5>
                                         <p>You can control cookies through your browser settings:</p>
-                                        
+
                                         <div className="row">
                                             <div className="col-md-6">
                                                 <h6><i className="bi bi-browser-chrome text-primary me-2"></i>Chrome:</h6>
                                                 <p><small>Settings → Privacy and security → Cookies and other site data</small></p>
-                                                
+
                                                 <h6><i className="bi bi-browser-firefox text-warning me-2"></i>Firefox:</h6>
                                                 <p><small>Options → Privacy & Security → Cookies and Site Data</small></p>
                                             </div>
                                             <div className="col-md-6">
                                                 <h6><i className="bi bi-browser-safari text-info me-2"></i>Safari:</h6>
                                                 <p><small>Preferences → Privacy → Cookies and website data</small></p>
-                                                
+
                                                 <h6><i className="bi bi-browser-edge text-success me-2"></i>Edge:</h6>
                                                 <p><small>Settings → Cookies and site permissions → Cookies and site data</small></p>
                                             </div>

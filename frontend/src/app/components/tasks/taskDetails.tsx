@@ -128,7 +128,8 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, mode }) => {
         if (currentMode === "edit") {
             ok = await updateTask(editedTask);
         } else {
-            ok = await createTask(editedTask);
+            const createdTask = await createTask(editedTask);
+            ok = createdTask !== false; // createTask now returns the task or false
         }
         if (ok) {
             // Redirect to tasks page without reload

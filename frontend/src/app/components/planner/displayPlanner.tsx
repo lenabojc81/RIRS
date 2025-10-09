@@ -2,10 +2,11 @@
 
 import { getPlanners, getAllPlanners, updatePlanner, deletePlanner } from "@/data/fetch_planners";
 import { initialPlanner, IPlanner } from "@/interfaces/IPlanner";
+import { ITask } from "@/interfaces/ITasks";
+import { updateTask } from "@/data/fetch_tasks";
 import React from "react";
 import PlannerDetails from "./plannerDetails";
-import GoalListElement from "../elements/goalListElement";
-import AddGoalBtnInput from "../elements/addGoalBtnInput";
+
 import MilestoneGoals from "./milestoneGoals";
 
 interface DisplayPlannerProps {
@@ -105,9 +106,12 @@ export default function DisplayPlanner({ archived = false }: DisplayPlannerProps
             alert("Cannot delete goals from a completed planner.");
             return;
         }
+        
+        if (!selectedPlanner) return;
+        
         const updatedPlanner = {
-            ...editedPlanner,
-            goals: (editedPlanner.goals || []).filter((goal) => goal.text !== goalText)
+            ...selectedPlanner,
+            goals: (selectedPlanner.goals || []).filter((goal) => goal.text !== goalText)
         };
 
         setEditedPlanner(updatedPlanner);
@@ -118,6 +122,11 @@ export default function DisplayPlanner({ archived = false }: DisplayPlannerProps
             if (success) {
                 setSelectedPlanner(updatedPlanner);
                 console.log("Goal deleted successfully");
+                
+                // Update the planners list as well
+                setPlanners(prevPlanners => 
+                    prevPlanners.map(p => p.id === updatedPlanner.id ? updatedPlanner : p)
+                );
             } else {
                 alert("Failed to delete goal");
             }
@@ -128,16 +137,22 @@ export default function DisplayPlanner({ archived = false }: DisplayPlannerProps
     };
 
     const handleEdit = (goalIndex: number) => {
+        console.log("handleEdit called with goalIndex:", goalIndex);
+        console.log("selectedPlanner:", selectedPlanner);
+        console.log("isPlannerCompleted:", isPlannerCompleted(selectedPlanner));
+        
         // Prevent editing if planner is completed
         if (isPlannerCompleted(selectedPlanner)) {
             alert("Cannot edit goals in a completed planner.");
             return;
         }
         
-        const goalToEdit = (editedPlanner.goals || [])[goalIndex];
+        const goalToEdit = (selectedPlanner?.goals || [])[goalIndex];
+        console.log("goalToEdit:", goalToEdit);
         if (goalToEdit) {
             setCurrentGoalText(goalToEdit.text);
             setEditingGoalIndex(goalIndex);
+            console.log("Set editing state - goalIndex:", goalIndex, "text:", goalToEdit.text);
         }
     }
 
@@ -148,10 +163,10 @@ export default function DisplayPlanner({ archived = false }: DisplayPlannerProps
             return;
         }
         
-        if (currentGoalText.trim()) {
+        if (currentGoalText.trim() && selectedPlanner) {
             const updatedPlanner = {
-                ...editedPlanner,
-                goals: editedPlanner.goals?.map((goal, index) =>
+                ...selectedPlanner,
+                goals: selectedPlanner.goals?.map((goal, index) =>
                     index === goalIndex ? { ...goal, text: currentGoalText.trim() } : goal
                 ) || []
             };
@@ -165,6 +180,11 @@ export default function DisplayPlanner({ archived = false }: DisplayPlannerProps
                 if (success) {
                     setSelectedPlanner(updatedPlanner);
                     console.log("Goal updated successfully");
+                    
+                    // Update the planners list as well
+                    setPlanners(prevPlanners => 
+                        prevPlanners.map(p => p.id === updatedPlanner.id ? updatedPlanner : p)
+                    );
                 } else {
                     alert("Failed to save goal changes");
                 }
@@ -176,6 +196,10 @@ export default function DisplayPlanner({ archived = false }: DisplayPlannerProps
     }
 
     const handleGoalAdded = async (updatedPlanner: IPlanner) => {
+        console.log("handleGoalAdded called with updatedPlanner:", updatedPlanner);
+        console.log("selectedPlanner:", selectedPlanner);
+        console.log("isPlannerCompleted:", isPlannerCompleted(selectedPlanner));
+        
         // Prevent adding goals if planner is completed
         if (isPlannerCompleted(selectedPlanner)) {
             alert("Cannot add goals to a completed planner.");
@@ -183,11 +207,22 @@ export default function DisplayPlanner({ archived = false }: DisplayPlannerProps
         }
         
         try {
+            console.log("Attempting to update planner in database...");
             const success = await updatePlanner(updatedPlanner);
+            console.log("updatePlanner result:", success);
+            
             if (success) {
                 setSelectedPlanner(updatedPlanner);
-                console.log("Goal added successfully");
+                setEditedPlanner(updatedPlanner);
+                console.log("Goal added successfully to state");
+                
+                // Update the planners list as well
+                setPlanners(prevPlanners => 
+                    prevPlanners.map(p => p.id === updatedPlanner.id ? updatedPlanner : p)
+                );
+                console.log("Updated planners list");
             } else {
+                console.error("updatePlanner returned false");
                 alert("Failed to save new goal");
             }
         } catch (error) {
@@ -250,6 +285,38 @@ export default function DisplayPlanner({ archived = false }: DisplayPlannerProps
         } catch (error) {
             console.error("DisplayPlanner: Error updating planner:", error);
             alert("Error updating planner");
+        }
+    }
+
+    const handleTaskUpdate = async (updatedTasks: ITask[]) => {
+        try {
+            // Only update the planner with the new tasks - don't update individual tasks
+            // since planner tasks are managed within the planner context only
+            if (selectedPlanner) {
+                const updatedPlanner = {
+                    ...selectedPlanner,
+                    tasks: updatedTasks
+                };
+                
+                const success = await updatePlanner(updatedPlanner);
+                if (success) {
+                    setSelectedPlanner(updatedPlanner);
+                    setEditedPlanner(updatedPlanner);
+                    
+                    const updatedPlanners = planners.map(p => 
+                        p.id === updatedPlanner.id ? updatedPlanner : p
+                    );
+                    setPlanners(updatedPlanners);
+                    
+                    console.log("Tasks updated successfully in planner");
+                } else {
+                    console.error("Failed to update planner with new tasks");
+                    alert("Error updating planner tasks");
+                }
+            }
+        } catch (error) {
+            console.error("Error updating planner tasks:", error);
+            alert("Error updating planner tasks");
         }
     }
 
@@ -321,6 +388,17 @@ export default function DisplayPlanner({ archived = false }: DisplayPlannerProps
                     <PlannerDetails 
                         planner={selectedPlanner} 
                         onPlannerUpdate={handlePlannerUpdate}
+                        onTaskUpdate={handleTaskUpdate}
+                        editedPlanner={editedPlanner}
+                        setEditedPlanner={setEditedPlanner}
+                        onGoalAdded={handleGoalAdded}
+                        handleEdit={handleEdit}
+                        handleDelete={handleDelete}
+                        handleSaveGoalEdit={handleSaveGoalEdit}
+                        editingGoalIndex={editingGoalIndex}
+                        currentGoalText={currentGoalText}
+                        setCurrentGoalText={setCurrentGoalText}
+                        setEditingGoalIndex={setEditingGoalIndex}
                     />
                     
                     {/* Show read-only notice for completed planners */}
@@ -343,30 +421,6 @@ export default function DisplayPlanner({ archived = false }: DisplayPlannerProps
                             </div>
                         </div>
                     )}
-                    
-                    {/* Only show editing components if planner is not completed */}
-                    {!isPlannerCompleted(selectedPlanner) && (
-                        <AddGoalBtnInput
-                            mode="edit"
-                            planner={editedPlanner}
-                            category="main"
-                            setEditedPlanner={setEditedPlanner}
-                            onGoalAdded={handleGoalAdded}
-                        />
-                    )}
-                    
-                    <GoalListElement
-                        goals={editedPlanner.goals || []}
-                        category="main"
-                        handleEdit={handleEdit}
-                        handleDelete={handleDelete}
-                        handleSaveGoalEdit={handleSaveGoalEdit}
-                        editingGoalIndex={editingGoalIndex}
-                        currentGoalText={currentGoalText}
-                        setCurrentGoalText={setCurrentGoalText}
-                        setEditingGoalIndex={setEditingGoalIndex}
-                        readOnly={isPlannerCompleted(selectedPlanner)}
-                    />
                     
                     {/* Show milestone goals (read-only for completed planners) */}
                     <MilestoneGoals

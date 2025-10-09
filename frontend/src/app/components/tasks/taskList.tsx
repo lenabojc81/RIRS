@@ -409,7 +409,7 @@ export default function TaskList() {
                 </div>
             </div>
 
-            <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+            <div className="row row-cols-1 row-cols-sm-1 row-cols-md-1 row-cols-lg-2 row-cols-xl-2 row-cols-xxl-3 g-3">
                 {currentTasks.map((task, idx) => {
                     const isOverdue = isTaskOverdue(task);
                     const isDueToday = isTaskDueToday(task);
@@ -452,7 +452,21 @@ export default function TaskList() {
                     
                     return (
                         <div key={task.id ?? `task-${idx}`} className="col">
-                            <div className={cardClass}>
+                            <div 
+                                className={cardClass}
+                                draggable={!task.date_done && !task.daily_tracker_date} // Only allow dragging incomplete tasks not already in tracker
+                                onDragStart={(e) => {
+                                    if (!task.date_done && !task.daily_tracker_date) {
+                                        e.dataTransfer.setData('application/json', JSON.stringify(task));
+                                        e.dataTransfer.effectAllowed = 'move';
+                                    }
+                                }}
+                                style={{ 
+                                    cursor: (!task.date_done && !task.daily_tracker_date) ? 'grab' : 'default',
+                                    opacity: task.daily_tracker_date ? 0.6 : 1
+                                }}
+                                title={task.daily_tracker_date ? 'Task is already in today\'s tracker' : ''}
+                            >
                                 <div className={cardBodyClass}>
                                 <div className="me-3">
                                     <button

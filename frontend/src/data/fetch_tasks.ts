@@ -53,17 +53,23 @@ export async function createTask(task: ITask) {
             },
             body: JSON.stringify(task),
         })
-
+        
         if (response.status === 201) {
             const data = await response.json();
-            return data.success;
+            return data.success ? data.task : false;
         } else {
-            const errorData = await response.json();
-            console.error('Error creating task:', errorData.error);
-            alert('Error: Failed to save task.');
+            try {
+                const errorData = await response.json();
+                console.error('Error creating task:', errorData.error || 'Unknown error');
+                alert('Error: Failed to save task.');
+            } catch (parseError) {
+                console.error('Could not parse error response');
+                alert('Error: Failed to save task.');
+            }
             return false;
         }
     } catch (error) {
+        console.error('Frontend: Exception during task creation:', error);
         alert('Error: An error occurred while saving the task.');
         console.error(error);
         return false;

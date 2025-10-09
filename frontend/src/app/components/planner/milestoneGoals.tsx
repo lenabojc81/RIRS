@@ -392,10 +392,113 @@ export default function MilestoneGoals({ planner, setEditedPlanner, onGoalAdded,
                 );
             case null:
                 return (
-                    <div className="alert alert-light border-2 text-center py-5">
-                        <SlStar size={48} className="text-muted mb-3" />
-                        <h6 className="text-muted mb-2">Select a Time View</h6>
-                        <p className="text-muted mb-0">Please select a view (Year, Month, or Week) to see milestone goals.</p>
+                    <div className="alert alert-light border-2 py-5">
+                        <div className="text-center mb-4">
+                            <SlStar size={48} className="text-primary mb-3" />
+                            <h5 className="text-primary mb-3">🎯 Milestone Goals Management</h5>
+                        </div>
+                        
+                        <div className="row g-4">
+                            <div className="col-md-4">
+                                <div className="card border-primary h-100">
+                                    <div className="card-body text-center">
+                                        <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                             style={{width: '50px', height: '50px'}}>
+                                            <i className="bi bi-calendar4-year fs-5"></i>
+                                        </div>
+                                        <h6 className="card-title text-primary">📅 Year Goals</h6>
+                                        <p className="card-text small text-muted">
+                                            Set long-term objectives and yearly targets. These goals appear in your calendar when their category is "year" and date_start matches the current year.
+                                        </p>
+                                        <button 
+                                            className="btn btn-outline-primary btn-sm"
+                                            onClick={() => setActiveView('year')}
+                                        >
+                                            View Years
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="col-md-4">
+                                <div className="card border-success h-100">
+                                    <div className="card-body text-center">
+                                        <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                             style={{width: '50px', height: '50px'}}>
+                                            <i className="bi bi-calendar3 fs-5"></i>
+                                        </div>
+                                        <h6 className="card-title text-success">🗓️ Month Goals</h6>
+                                        <p className="card-text small text-muted">
+                                            Plan monthly milestones and objectives. These goals appear in your calendar when their category is "month" and date_start or date_end is in the current month.
+                                        </p>
+                                        <button 
+                                            className="btn btn-outline-success btn-sm"
+                                            onClick={() => setActiveView('month')}
+                                        >
+                                            View Months
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="col-md-4">
+                                <div className="card border-info h-100">
+                                    <div className="card-body text-center">
+                                        <div className="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                             style={{width: '50px', height: '50px'}}>
+                                            <i className="bi bi-calendar-week fs-5"></i>
+                                        </div>
+                                        <h6 className="card-title text-info">📋 Week Goals</h6>
+                                        <p className="card-text small text-muted">
+                                            Create specific weekly targets and short-term goals. These goals appear in your calendar when their category is "week" and date_start is in the current week.
+                                        </p>
+                                        <button 
+                                            className="btn btn-outline-info btn-sm"
+                                            onClick={() => setActiveView('week')}
+                                        >
+                                            View Weeks
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="mt-4 p-3 bg-light border rounded">
+                            <h6 className="text-dark mb-2">
+                                <i className="bi bi-lightbulb me-2 text-warning"></i>
+                                How to Use Milestone Goals:
+                            </h6>
+                            <div className="row g-2">
+                                <div className="col-lg-6">
+                                    <ul className="list-unstyled mb-0 small">
+                                        <li className="mb-1">
+                                            <span className="badge bg-primary me-2">1</span>
+                                            Select a view above (Year, Month, or Week)
+                                        </li>
+                                        <li className="mb-1">
+                                            <span className="badge bg-success me-2">2</span>
+                                            Click on a time period to create or view goals
+                                        </li>
+                                        <li className="mb-1">
+                                            <span className="badge bg-info me-2">3</span>
+                                            Add goals that will automatically appear in your planner calendar
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div className="col-lg-6">
+                                    <div className="small">
+                                        <div className="mb-2">
+                                            <strong>Button Colors:</strong>
+                                        </div>
+                                        <div className="d-flex flex-wrap gap-2">
+                                            <span className="badge bg-warning">🟡 Has Goals</span>
+                                            <span className="badge bg-success">🟢 Selected</span>
+                                            <span className="badge border border-info text-info bg-white">⚪ Empty</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 );
             default:

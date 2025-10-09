@@ -10,6 +10,8 @@ export interface ITask {
     labels?: string[]; // Array of label IDs
     estimated_time?: number;
     priority?: number; // 1-5 (1 = highest priority, 5 = lowest priority)
+    daily_tracker_date?: string | null; // Date string in YYYY-MM-DD format for daily tracker, null to remove
+    scheduled_date?: string; // Date string in YYYY-MM-DD format for planner calendar scheduling
 }
 
 export const initialTask: ITask = {
@@ -23,4 +25,6 @@ export const initialTask: ITask = {
     labels: [],
     estimated_time: 0,
     priority: 3, // Default to medium priority
+    daily_tracker_date: undefined,
+    scheduled_date: undefined,
 };

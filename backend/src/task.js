@@ -107,7 +107,7 @@ router.post('/createTask', authenticateUser, async (req, res) => {
         res.status(201).json({ success: true, task: newTask });
     } catch(err) {
         console.error('Error creating task:', err);
-        res.status(400).json({ error: err.message });
+        res.status(400).json({ success: false, error: err.message });
     }
 });
 
@@ -276,6 +276,68 @@ router.delete('/deleteTasks', authenticateUser, async (req, res) => {
         });
     } catch(err) {
         console.error('Error deleting tasks:', err);
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// Clean up expired daily tracker tasks (move them back to main list)
+router.post('/cleanupDailyTracker', authenticateUser, async (req, res) => {
+    try {
+        const userDocRef = doc(database, 'users', req.user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const userData = userDoc.data();
+        const currentTasks = userData.tasks || [];
+        
+        // Get today's date string
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Find tasks that are in daily tracker but not for today and not completed
+        let cleanedCount = 0;
+        const updatedTasks = currentTasks.map(task => {
+            if (task.daily_tracker_date && task.daily_tracker_date !== today && !task.date_done) {
+                cleanedCount++;
+                return { ...task, daily_tracker_date: null };
+            }
+            return task;
+        });
+
+        if (cleanedCount > 0) {
+            // Update user document with cleaned tasks
+            await updateDoc(userDocRef, {
+                tasks: updatedTasks,
+                updatedAt: new Date()
+            });
+            
+            console.log(`Cleaned up ${cleanedCount} expired daily tracker tasks for user: ${req.user.uid}`);
+        }
+
+        res.status(200).json({ 
+            success: true, 
+            cleanedCount: cleanedCount,
+            message: `Cleaned up ${cleanedCount} expired daily tracker task(s)`
+        });
+    } catch(err) {
+        console.error('Error cleaning up daily tracker:', err);
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// Automatic cleanup endpoint for all users (can be called by cron job)
+router.post('/cleanupAllDailyTrackers', async (req, res) => {
+    try {
+        // This would require admin privileges or be called internally
+        // For now, just return a message about manual cleanup
+        res.status(200).json({ 
+            success: true, 
+            message: 'Use /cleanupDailyTracker endpoint for individual user cleanup' 
+        });
+    } catch(err) {
+        console.error('Error in global cleanup:', err);
         res.status(400).json({ error: err.message });
     }
 });
