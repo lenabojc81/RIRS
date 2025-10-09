@@ -29,7 +29,7 @@ export default function UserPage() {
                     <div className="row align-items-center">
                         <div className="col-lg-8">
                             <h1 className="display-5 fw-bold mb-3">
-                                Welcome back, 
+                                Welcome back,&nbsp;
                                 <span className="text-warning">{user?.username}</span>!
                             </h1>
                             <p className="lead mb-4">
@@ -37,9 +37,9 @@ export default function UserPage() {
                             </p>
                         </div>
                         <div className="col-lg-4 text-center">
-                            <div className="bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg" 
-                                 style={{width: '120px', height: '120px'}}>
-                                <i className="bi bi-person-fill text-primary" style={{fontSize: '4rem'}}></i>
+                            <div className="bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg"
+                                style={{ width: '120px', height: '120px' }}>
+                                <i className="bi bi-person-fill text-primary" style={{ fontSize: '4rem' }}></i>
                             </div>
                         </div>
                     </div>
@@ -56,7 +56,7 @@ export default function UserPage() {
                                 <div className="col-12">
                                     <h2 className="display-6 fw-bold mb-4 text-center">Profile Information</h2>
                                 </div>
-                                
+
                                 {/* Main Profile Card */}
                                 <div className="col-lg-8">
                                     <div className="card border-0 shadow-lg">
@@ -64,21 +64,21 @@ export default function UserPage() {
                                             <div className="row align-items-center">
                                                 {/* Profile Avatar */}
                                                 <div className="col-md-4 text-center mb-4 mb-md-0">
-                                                    <div className="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg" 
-                                                         style={{width: '120px', height: '120px'}}>
-                                                        <i className="bi bi-person-fill text-white" style={{fontSize: '4rem'}}></i>
+                                                    <div className="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg"
+                                                        style={{ width: '120px', height: '120px' }}>
+                                                        <i className="bi bi-person-fill text-white" style={{ fontSize: '4rem' }}></i>
                                                     </div>
                                                     <h3 className="mt-3 mb-1 text-primary fw-bold">{user.username}</h3>
                                                     <p className="text-muted mb-0">TaskTracker User</p>
                                                 </div>
-                                                
+
                                                 {/* Profile Details */}
                                                 <div className="col-md-8">
                                                     <div className="row g-3">
                                                         <div className="col-12">
                                                             <div className="d-flex align-items-center p-3 bg-light rounded-3">
-                                                                <div className="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                                                     style={{width: '40px', height: '40px'}}>
+                                                                <div className="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                                                    style={{ width: '40px', height: '40px' }}>
                                                                     <i className="bi bi-envelope fs-6"></i>
                                                                 </div>
                                                                 <div>
@@ -87,12 +87,12 @@ export default function UserPage() {
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        
+
                                                         {user.createdAt && (
                                                             <div className="col-12">
                                                                 <div className="d-flex align-items-center p-3 bg-light rounded-3">
-                                                                    <div className="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                                                         style={{width: '40px', height: '40px'}}>
+                                                                    <div className="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                                                        style={{ width: '40px', height: '40px' }}>
                                                                         <i className="bi bi-calendar-plus fs-6"></i>
                                                                     </div>
                                                                     <div>
@@ -121,19 +121,19 @@ export default function UserPage() {
                                 <div className="col-12">
                                     <h2 className="display-6 fw-bold mb-4 text-center">Quick Actions</h2>
                                 </div>
-                                
+
                                 <div className="col-md-6 col-lg-3">
                                     <div className="card h-100 border-0 shadow-sm">
                                         <div className="card-body text-center p-4">
-                                            <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                                 style={{width: '60px', height: '60px'}}>
+                                            <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                                style={{ width: '60px', height: '60px' }}>
                                                 <i className="bi bi-list-task fs-4"></i>
                                             </div>
                                             <h4 className="card-title">My Tasks</h4>
                                             <p className="card-text text-muted mb-3">
                                                 View and manage your personal tasks
                                             </p>
-                                            <button 
+                                            <button
                                                 className="btn btn-primary w-100"
                                                 onClick={() => router.push('/tasks')}
                                             >
@@ -146,15 +146,15 @@ export default function UserPage() {
                                 <div className="col-md-6 col-lg-3">
                                     <div className="card h-100 border-0 shadow-sm">
                                         <div className="card-body text-center p-4">
-                                            <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                                 style={{width: '60px', height: '60px'}}>
+                                            <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                                style={{ width: '60px', height: '60px' }}>
                                                 <i className="bi bi-bullseye fs-4"></i>
                                             </div>
                                             <h4 className="card-title">My Planners</h4>
                                             <p className="card-text text-muted mb-3">
                                                 Access your goal-oriented planners
                                             </p>
-                                            <button 
+                                            <button
                                                 className="btn btn-success w-100"
                                                 onClick={() => router.push('/planners')}
                                             >
@@ -167,19 +167,19 @@ export default function UserPage() {
                                 <div className="col-md-6 col-lg-3">
                                     <div className="card h-100 border-0 shadow-sm">
                                         <div className="card-body text-center p-4">
-                                            <div className="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                                 style={{width: '60px', height: '60px'}}>
-                                                <i className="bi bi-arrow-left fs-4"></i>
+                                            <div className="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                                style={{ width: '60px', height: '60px' }}>
+                                                <i className="bi bi-calendar-check fs-4"></i>
                                             </div>
-                                            <h4 className="card-title">Go Back</h4>
+                                            <h4 className="card-title">Daily Tracker</h4>
                                             <p className="card-text text-muted mb-3">
-                                                Return to previous page
+                                                Track your daily activities and habits
                                             </p>
-                                            <button 
+                                            <button
                                                 className="btn btn-warning w-100"
-                                                onClick={() => router.back()}
+                                                onClick={() => router.push('/daily-tracker')}
                                             >
-                                                Go Back
+                                                Open Tracker
                                             </button>
                                         </div>
                                     </div>
@@ -188,15 +188,15 @@ export default function UserPage() {
                                 <div className="col-md-6 col-lg-3">
                                     <div className="card h-100 border-0 shadow-sm">
                                         <div className="card-body text-center p-4">
-                                            <div className="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                                 style={{width: '60px', height: '60px'}}>
+                                            <div className="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                                style={{ width: '60px', height: '60px' }}>
                                                 <i className="bi bi-box-arrow-right fs-4"></i>
                                             </div>
                                             <h4 className="card-title">Sign Out</h4>
                                             <p className="card-text text-muted mb-3">
                                                 Securely log out of your account
                                             </p>
-                                            <button 
+                                            <button
                                                 className="btn btn-danger w-100"
                                                 onClick={handleLogout}
                                                 disabled={isLoggingOut}
@@ -220,15 +220,15 @@ export default function UserPage() {
                                 <div className="col-12">
                                     <h2 className="display-6 fw-bold mb-4 text-center">Account Overview</h2>
                                 </div>
-                                
+
                                 <div className="col-md-4">
                                     <div className="card h-100 border-0 shadow-sm cursor-pointer" onClick={() => router.push('/completed-tasks')}>
                                         <div className="card-body text-center p-4">
-                                            <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                                 style={{width: '60px', height: '60px'}}>
+                                            <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                                style={{ width: '60px', height: '60px' }}>
                                                 <i className="bi bi-check-circle fs-4"></i>
                                             </div>
-                                            <h4 className="card-title">Tasks Completed</h4>
+                                            <h4 className="card-title">Completed Tasks</h4>
                                             <p className="card-text text-muted">
                                                 Track your productivity with completed task metrics and achievement progress.
                                             </p>
@@ -239,8 +239,8 @@ export default function UserPage() {
                                 <div className="col-md-4">
                                     <div className="card h-100 border-0 shadow-sm cursor-pointer" onClick={() => router.push('/archived-planners')}>
                                         <div className="card-body text-center p-4">
-                                            <div className="bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                                 style={{width: '60px', height: '60px'}}>
+                                            <div className="bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                                style={{ width: '60px', height: '60px' }}>
                                                 <i className="bi bi-archive fs-4"></i>
                                             </div>
                                             <h4 className="card-title">Archived Planners</h4>
@@ -254,8 +254,8 @@ export default function UserPage() {
                                 <div className="col-md-4">
                                     <div className="card h-100 border-0 shadow-sm cursor-pointer" onClick={() => router.push('/labels')}>
                                         <div className="card-body text-center p-4">
-                                            <div className="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                                 style={{width: '60px', height: '60px'}}>
+                                            <div className="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                                style={{ width: '60px', height: '60px' }}>
                                                 <i className="bi bi-tags fs-4"></i>
                                             </div>
                                             <h4 className="card-title">Task Labels</h4>

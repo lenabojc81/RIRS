@@ -1,4 +1,5 @@
 import { ITask } from "./ITasks";
+import { IEvent } from "./IEvent";
 
 export interface IGoal {
     id?: string;
@@ -22,6 +23,7 @@ export interface IPlanner {
     date_done?: Date;
     goals?: IGoal[];
     tasks?: ITask[];
+    events?: IEvent[];
 };
 
 export const initialPlanner: IPlanner = {
@@ -31,4 +33,5 @@ export const initialPlanner: IPlanner = {
     date_done: undefined,
     goals: [],
     tasks: [],
+    events: [],
 }

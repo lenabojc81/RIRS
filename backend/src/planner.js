@@ -244,4 +244,159 @@ router.get('/getUndonePlanners', authenticateUser, async (req, res) => {
     }
 });
 
+// Add event to a specific planner
+router.post('/addEvent/:plannerId', authenticateUser, async (req, res) => {
+    try {
+        const plannerId = req.params.plannerId;
+        const newEvent = {
+            ...req.body,
+            id: generateUniqueId(),
+        };
+
+        const userDocRef = doc(database, 'users', req.user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const userData = userDoc.data();
+        const currentPlanners = userData.planners || [];
+        
+        // Find the specific planner
+        const plannerIndex = currentPlanners.findIndex(planner => planner.id === plannerId);
+        
+        if (plannerIndex === -1) {
+            return res.status(404).json({ success: false, error: 'Planner not found' });
+        }
+
+        // Initialize events array if it doesn't exist
+        if (!currentPlanners[plannerIndex].events) {
+            currentPlanners[plannerIndex].events = [];
+        }
+        
+        // Add new event to planner's events array
+        currentPlanners[plannerIndex].events.push(newEvent);
+        
+        // Update user document with modified planners
+        await updateDoc(userDocRef, {
+            planners: currentPlanners,
+            updatedAt: new Date()
+        });
+
+        console.log('New event added to planner for user:', req.user.uid);
+        res.status(201).json({ success: true, event: newEvent });
+    } catch(err) {
+        console.error('Error adding event to planner:', err);
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// Update event in a specific planner
+router.put('/updateEvent/:plannerId/:eventId', authenticateUser, async (req, res) => {
+    try {
+        const plannerId = req.params.plannerId;
+        const eventId = req.params.eventId;
+
+        const userDocRef = doc(database, 'users', req.user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const userData = userDoc.data();
+        const currentPlanners = userData.planners || [];
+        
+        // Find the specific planner
+        const plannerIndex = currentPlanners.findIndex(planner => planner.id === plannerId);
+        
+        if (plannerIndex === -1) {
+            return res.status(404).json({ success: false, error: 'Planner not found' });
+        }
+
+        // Initialize events array if it doesn't exist
+        if (!currentPlanners[plannerIndex].events) {
+            currentPlanners[plannerIndex].events = [];
+        }
+
+        // Find and update the specific event
+        const eventIndex = currentPlanners[plannerIndex].events.findIndex(event => event.id === eventId);
+        
+        if (eventIndex === -1) {
+            return res.status(404).json({ success: false, error: 'Event not found' });
+        }
+
+        // Update the event at the found index
+        currentPlanners[plannerIndex].events[eventIndex] = { 
+            ...currentPlanners[plannerIndex].events[eventIndex], 
+            ...req.body 
+        };
+        
+        // Update user document with modified planners
+        await updateDoc(userDocRef, {
+            planners: currentPlanners,
+            updatedAt: new Date()
+        });
+
+        console.log('Event successfully updated for user:', req.user.uid);
+        res.status(200).json({ success: true, event: currentPlanners[plannerIndex].events[eventIndex] });
+    } catch (err) {
+        console.error('Error updating event:', err);
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// Delete event from a specific planner
+router.delete('/deleteEvent/:plannerId/:eventId', authenticateUser, async (req, res) => {
+    try {
+        const plannerId = req.params.plannerId;
+        const eventId = req.params.eventId;
+
+        const userDocRef = doc(database, 'users', req.user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const userData = userDoc.data();
+        const currentPlanners = userData.planners || [];
+        
+        // Find the specific planner
+        const plannerIndex = currentPlanners.findIndex(planner => planner.id === plannerId);
+        
+        if (plannerIndex === -1) {
+            return res.status(404).json({ success: false, error: 'Planner not found' });
+        }
+
+        // Initialize events array if it doesn't exist
+        if (!currentPlanners[plannerIndex].events) {
+            currentPlanners[plannerIndex].events = [];
+        }
+
+        // Filter out the event to delete
+        const updatedEvents = currentPlanners[plannerIndex].events.filter(event => event.id !== eventId);
+        
+        if (updatedEvents.length === currentPlanners[plannerIndex].events.length) {
+            return res.status(404).json({ success: false, error: 'Event not found' });
+        }
+
+        // Update the planner's events
+        currentPlanners[plannerIndex].events = updatedEvents;
+        
+        // Update user document with filtered events
+        await updateDoc(userDocRef, {
+            planners: currentPlanners,
+            updatedAt: new Date()
+        });
+
+        console.log('Event deleted from planner for user:', req.user.uid);
+        res.status(200).json({ success: true });
+    } catch(err) {
+        console.error('Error deleting event from planner:', err);
+        res.status(400).json({ error: err.message });
+    }
+});
+
 export default router;

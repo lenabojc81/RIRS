@@ -2,9 +2,11 @@
 import { useState, useEffect } from 'react';
 import { ITask } from '../../../interfaces/ITasks';
 import { IPlanner, IGoal } from '../../../interfaces/IPlanner';
+import { IEvent, initialEvent } from '../../../interfaces/IEvent';
 import PlannerTaskCreateModal from './plannerTaskCreateModal';
 import PlannerTaskEditModal from './plannerTaskEditModal';
 import TaskActionModal from './taskActionModal';
+import EventViewModal from '../modals/eventViewModal';
 
 interface PlannerCalendarProps {
     planner: IPlanner;
@@ -26,6 +28,13 @@ export default function PlannerCalendar({ planner, onTaskUpdate }: PlannerCalend
     const [showDayDetailsModal, setShowDayDetailsModal] = useState(false);
     const [selectedDayDate, setSelectedDayDate] = useState<string | null>(null);
     const [selectedDayTasks, setSelectedDayTasks] = useState<ITask[]>([]);
+    const [selectedDayEvents, setSelectedDayEvents] = useState<IEvent[]>([]);
+    const [showAddChoiceModal, setShowAddChoiceModal] = useState(false);
+    const [addChoiceDate, setAddChoiceDate] = useState<string | null>(null);
+    const [showCreateEventModal, setShowCreateEventModal] = useState(false);
+    const [showEditEventModal, setShowEditEventModal] = useState(false);
+    const [editingEvent, setEditingEvent] = useState<IEvent | null>(null);
+    const [eventCreationDate, setEventCreationDate] = useState<string | null>(null);
 
     // Get tasks from planner
     const plannerTasks = planner.tasks || [];
@@ -106,7 +115,27 @@ export default function PlannerCalendar({ planner, onTaskUpdate }: PlannerCalend
         return plannerTasks.filter(task => task.scheduled_date === dateKey);
     };
 
+    // Get events for a specific date
+    const getEventsForDate = (dateKey: string): IEvent[] => {
+        const plannerEvents = planner.events || [];
+        return plannerEvents.filter(event => {
+            const eventStartDate = formatDateKey(new Date(event.date_start));
+            
+            // If no end date, only show on start date
+            if (!event.date_end) {
+                return eventStartDate === dateKey;
+            }
+            
+            // If has end date, show on all days between start and end (inclusive)
+            const eventEndDate = formatDateKey(new Date(event.date_end));
+            
+            // Compare date strings to avoid timezone issues
+            return dateKey >= eventStartDate && dateKey <= eventEndDate;
+        });
+    };
+
     const isOverloaded = (dateKey: string): boolean => {
+        // Only count tasks for overload (events don't count toward the 3-task limit)
         return getTasksForDate(dateKey).length > 3;
     };
 
@@ -136,15 +165,29 @@ export default function PlannerCalendar({ planner, onTaskUpdate }: PlannerCalend
     };
 
     // Task creation handlers
+    const handleAddClick = (dateKey: string) => {
+        setAddChoiceDate(dateKey);
+        setShowAddChoiceModal(true);
+    };
+
     const handleCreateTaskClick = (dateKey: string) => {
         setTaskCreationDate(dateKey);
         setShowCreateTaskModal(true);
+        setShowAddChoiceModal(false);
+    };
+
+    const handleCreateEventClick = (dateKey: string) => {
+        setEventCreationDate(dateKey);
+        setShowCreateEventModal(true);
+        setShowAddChoiceModal(false);
     };
 
     const handleDayClick = (dateKey: string) => {
         const dayTasks = getTasksForDate(dateKey);
+        const dayEvents = getEventsForDate(dateKey);
         setSelectedDayDate(dateKey);
         setSelectedDayTasks(dayTasks);
+        setSelectedDayEvents(dayEvents);
         setShowDayDetailsModal(true);
     };
 
@@ -202,6 +245,49 @@ export default function PlannerCalendar({ planner, onTaskUpdate }: PlannerCalend
 
         setShowEditTaskModal(false);
         setEditingTask(null);
+    };
+
+    // Event handlers
+    const handleEventCreated = () => {
+        setShowCreateEventModal(false);
+        setEventCreationDate(null);
+        // Refresh the page to show new event
+        window.location.reload();
+    };
+
+    const handleEditEventClick = (event: IEvent) => {
+        setEditingEvent(event);
+        setShowEditEventModal(true);
+    };
+
+    const handleEventEdited = () => {
+        setShowEditEventModal(false);
+        setEditingEvent(null);
+        // Refresh the page to show updated event
+        window.location.reload();
+    };
+
+    const handleDeleteEventClick = async (event: IEvent) => {
+        if (!event.id || !planner.id) {
+            console.error('Missing event ID or planner ID for deletion');
+            return;
+        }
+
+        const confirmDelete = window.confirm(`Are you sure you want to delete the event "${event.name}"?`);
+        if (!confirmDelete) return;
+
+        try {
+            const { deleteEvent } = await import('../../../data/fetch_events');
+            const success = await deleteEvent(planner.id, event.id);
+            if (success) {
+                window.location.reload();
+            } else {
+                alert('Failed to delete event. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error deleting event:', error);
+            alert('Failed to delete event. Please try again.');
+        }
     };
 
     // Render week view
@@ -270,14 +356,59 @@ export default function PlannerCalendar({ planner, onTaskUpdate }: PlannerCalend
                                     </div>
                                 </div>
                             ))}
+                            {/* Render events */}
+                            {(() => {
+                                const dayEvents = getEventsForDate(dateKey);
+                                return dayEvents.map((event, idx) => (
+                                    <div key={event.id || `event-${idx}`} className="mb-1">
+                                        <div className={`badge w-100 text-start p-2`} 
+                                             style={{ 
+                                                 fontSize: '0.7rem', 
+                                                 backgroundColor: event.color || '#3b82f6',
+                                                 color: '#fff',
+                                                 border: '2px dashed rgba(255,255,255,0.3)'
+                                             }}>
+                                            <div className="d-flex justify-content-between align-items-center">
+                                                <span className="text-truncate me-1">
+                                                    <i className="bi bi-calendar-event me-1"></i>
+                                                    {event.name}
+                                                    {event.date_end && (
+                                                        <span className="ms-1" style={{ fontSize: '0.6rem', opacity: 0.8 }}>
+                                                            <i className="bi bi-arrow-right-short"></i>
+                                                        </span>
+                                                    )}
+                                                </span>
+                                                <div className="d-flex gap-1">
+                                                    <button 
+                                                        className="btn btn-sm p-0 text-white"
+                                                        onClick={() => handleEditEventClick(event)}
+                                                        style={{ fontSize: '0.6rem' }}
+                                                        title="Edit event"
+                                                    >
+                                                        <i className="bi bi-info-circle"></i>
+                                                    </button>
+                                                    <button 
+                                                        className="btn btn-sm p-0 text-white"
+                                                        onClick={() => handleDeleteEventClick(event)}
+                                                        style={{ fontSize: '0.6rem' }}
+                                                        title="Delete event"
+                                                    >
+                                                        <i className="bi bi-x"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ));
+                            })()}
                             <div className="mt-2">
                                 <button 
                                     className="btn btn-outline-primary btn-sm w-100"
-                                    onClick={() => handleCreateTaskClick(dateKey)}
-                                    title="Create new task for this date"
+                                    onClick={() => handleAddClick(dateKey)}
+                                    title="Add task or event for this date"
                                 >
                                     <i className="bi bi-plus-circle me-1"></i>
-                                    Add Task
+                                    Add
                                 </button>
                             </div>
                         </div>
@@ -311,21 +442,24 @@ export default function PlannerCalendar({ planner, onTaskUpdate }: PlannerCalend
                     const currentDateObj = new Date(currentDate.getFullYear(), currentDate.getMonth(), date);
                     const dateKey = formatDateKey(currentDateObj);
                     const dayTasks = getTasksForDate(dateKey);
+                    const dayEvents = getEventsForDate(dateKey);
                     const overloaded = isOverloaded(dateKey);
+                    const hasItems = dayTasks.length > 0 || dayEvents.length > 0;
 
                     days.push(
                         <div key={dateKey} className="col p-1">
                             <div 
-                                className={`card h-100 ${overloaded ? 'border-warning border-2' : 'border-light'} ${dayTasks.length > 0 ? 'calendar-day-clickable' : ''}`}
-                                style={{ minHeight: '80px', cursor: dayTasks.length > 0 ? 'pointer' : 'default' }}
-                                onClick={() => dayTasks.length > 0 && handleDayClick(dateKey)}
-                                title={dayTasks.length > 0 ? `Click to view all ${dayTasks.length} task(s) for this date` : ''}
+                                className={`card h-100 ${overloaded ? 'border-warning border-2' : 'border-light'} ${hasItems ? 'calendar-day-clickable' : ''}`}
+                                style={{ minHeight: '80px', cursor: hasItems ? 'pointer' : 'default' }}
+                                onClick={() => hasItems && handleDayClick(dateKey)}
+                                title={hasItems ? `Click to view ${dayTasks.length} task(s) and ${dayEvents.length} event(s) for this date` : ''}
                             >
                                 <div className={`card-header text-center py-1 ${overloaded ? 'bg-warning text-dark' : 'bg-light'}`}>
                                     <small className="fw-bold">{date}</small>
                                     {overloaded && <i className="bi bi-exclamation-triangle ms-1" style={{ fontSize: '0.7rem' }}></i>}
                                 </div>
                                 <div className="card-body p-1" style={{ fontSize: '0.65rem' }}>
+                                    {/* Show first task */}
                                     {dayTasks.slice(0, 1).map((task, idx) => (
                                         <div key={task.id || idx} className="mb-1">
                                             <div className={`badge w-100 text-truncate p-1 ${
@@ -335,14 +469,41 @@ export default function PlannerCalendar({ planner, onTaskUpdate }: PlannerCalend
                                             </div>
                                         </div>
                                     ))}
-                                    {dayTasks.length > 1 && (
-                                        <small className="text-muted d-block mb-1">+{dayTasks.length - 1} more</small>
+                                    {/* Show first event */}
+                                    {dayEvents.slice(0, 1).map((event, idx) => (
+                                        <div key={event.id || `event-${idx}`} className="mb-1">
+                                            <div className={`badge w-100 text-truncate p-1`} 
+                                                 style={{ 
+                                                     fontSize: '0.55rem', 
+                                                     backgroundColor: event.color || '#3b82f6',
+                                                     color: '#fff',
+                                                     border: '1px dashed rgba(255,255,255,0.3)'
+                                                 }}>
+                                                <i className="bi bi-calendar-event me-1" style={{ fontSize: '0.5rem' }}></i>
+                                                {event.name}
+                                                {event.date_end && (
+                                                    <i className="bi bi-arrow-right-short ms-1" style={{ fontSize: '0.5rem', opacity: 0.8 }}></i>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {/* Show count of additional items */}
+                                    {(dayTasks.length + dayEvents.length > 2) && (
+                                        <small className="text-muted d-block mb-1">
+                                            +{dayTasks.length + dayEvents.length - 2} more
+                                        </small>
+                                    )}
+                                    {(dayTasks.length === 1 && dayEvents.length > 1) && (
+                                        <small className="text-muted d-block mb-1">+{dayEvents.length - 1} more events</small>
+                                    )}
+                                    {(dayTasks.length > 1 && dayEvents.length === 0) && (
+                                        <small className="text-muted d-block mb-1">+{dayTasks.length - 1} more tasks</small>
                                     )}
                                     <button 
                                         className="btn btn-outline-primary btn-sm w-100 p-1"
-                                        onClick={() => handleCreateTaskClick(dateKey)}
+                                        onClick={() => handleAddClick(dateKey)}
                                         style={{ fontSize: '0.6rem' }}
-                                        title="Add task"
+                                        title="Add task or event"
                                     >
                                         <i className="bi bi-plus"></i>
                                     </button>
@@ -615,12 +776,12 @@ export default function PlannerCalendar({ planner, onTaskUpdate }: PlannerCalend
                 <div className="mt-3">
                     <small className="text-muted">
                         <i className="bi bi-info-circle me-1"></i>
-                        Click the "+" button on any day to create a new planner-specific task for that date. 
+                        Click the "Add" button on any day to choose between creating a task or event for that date. 
                         {view === 'month' && (
                             <span> In month view, <strong>click on any day with tasks</strong> to view all tasks for that date. </span>
                         )}
-                        These tasks are separate from your main task collection and only exist within this planner.
-                        Days with more than 3 tasks will be highlighted in yellow as a warning.
+                        These items are separate from your main task collection and only exist within this planner.
+                        Days with more than 3 items will be highlighted in yellow as a warning.
                     </small>
                 </div>
             </div>
@@ -668,7 +829,7 @@ export default function PlannerCalendar({ planner, onTaskUpdate }: PlannerCalend
                             <div className="modal-header bg-primary text-white">
                                 <h5 className="modal-title">
                                     <i className="bi bi-calendar-day me-2"></i>
-                                    Tasks for {new Date(selectedDayDate + 'T00:00:00').toLocaleDateString('en-US', { 
+                                    Schedule for {new Date(selectedDayDate + 'T00:00:00').toLocaleDateString('en-US', { 
                                         weekday: 'long', 
                                         year: 'numeric', 
                                         month: 'long', 
@@ -682,66 +843,151 @@ export default function PlannerCalendar({ planner, onTaskUpdate }: PlannerCalend
                                 ></button>
                             </div>
                             <div className="modal-body">
-                                {selectedDayTasks.length > 0 ? (
-                                    <div className="row">
-                                        {selectedDayTasks.map((task, idx) => (
-                                            <div key={task.id || idx} className="col-12 mb-3">
-                                                <div className="card border-0 shadow-sm">
-                                                    <div className="card-body">
-                                                        <div className="d-flex align-items-center justify-content-between">
-                                                            <div className="d-flex align-items-center">
-                                                                <div className={`badge me-3 ${
-                                                                    task.date_done ? 'bg-success' :
-                                                                    task.priority === 1 ? 'bg-danger' :
-                                                                    task.priority === 2 ? 'bg-warning text-dark' :
-                                                                    'bg-secondary'
-                                                                }`} style={{ minWidth: '60px' }}>
-                                                                    {task.date_done ? 'Done' :
-                                                                     task.priority === 1 ? 'High' :
-                                                                     task.priority === 2 ? 'Medium' : 'Low'}
+                                {(selectedDayTasks.length > 0 || selectedDayEvents.length > 0) ? (
+                                    <div>
+                                        {/* Tasks Section */}
+                                        {selectedDayTasks.length > 0 && (
+                                            <div className="mb-4">
+                                                <h6 className="text-primary mb-3">
+                                                    <i className="bi bi-list-task me-2"></i>
+                                                    Tasks ({selectedDayTasks.length})
+                                                </h6>
+                                                <div className="row">
+                                                    {selectedDayTasks.map((task, idx) => (
+                                                        <div key={task.id || idx} className="col-12 mb-3">
+                                                            <div className="card border-0 shadow-sm">
+                                                                <div className="card-body">
+                                                                    <div className="d-flex align-items-center justify-content-between">
+                                                                        <div className="d-flex align-items-center">
+                                                                            <div className={`badge me-3 ${
+                                                                                task.date_done ? 'bg-success' :
+                                                                                task.priority === 1 ? 'bg-danger' :
+                                                                                task.priority === 2 ? 'bg-warning text-dark' :
+                                                                                'bg-secondary'
+                                                                            }`} style={{ minWidth: '60px' }}>
+                                                                                {task.date_done ? 'Done' :
+                                                                                 task.priority === 1 ? 'High' :
+                                                                                 task.priority === 2 ? 'Medium' : 'Low'}
+                                                                            </div>
+                                                                            <div>
+                                                                                <h6 className={`mb-1 ${task.date_done ? 'text-decoration-line-through text-muted' : ''}`}>
+                                                                                    {task.name}
+                                                                                </h6>
+                                                                                {task.description && (
+                                                                                    <small className="text-muted">{task.description}</small>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="d-flex gap-2">
+                                                                            <button
+                                                                                className="btn btn-outline-primary btn-sm"
+                                                                                onClick={() => {
+                                                                                    setShowDayDetailsModal(false);
+                                                                                    handleEditTaskClick(task);
+                                                                                }}
+                                                                                title="Edit task"
+                                                                            >
+                                                                                <i className="bi bi-pencil"></i>
+                                                                            </button>
+                                                                            <button
+                                                                                className="btn btn-outline-danger btn-sm"
+                                                                                onClick={() => {
+                                                                                    setShowDayDetailsModal(false);
+                                                                                    handleTaskActionClick(task);
+                                                                                }}
+                                                                                title="Task actions"
+                                                                            >
+                                                                                <i className="bi bi-three-dots"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                                <div>
-                                                                    <h6 className={`mb-1 ${task.date_done ? 'text-decoration-line-through text-muted' : ''}`}>
-                                                                        {task.name}
-                                                                    </h6>
-                                                                    {task.description && (
-                                                                        <small className="text-muted">{task.description}</small>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            <div className="d-flex gap-2">
-                                                                <button
-                                                                    className="btn btn-outline-primary btn-sm"
-                                                                    onClick={() => {
-                                                                        setShowDayDetailsModal(false);
-                                                                        handleEditTaskClick(task);
-                                                                    }}
-                                                                    title="Edit task"
-                                                                >
-                                                                    <i className="bi bi-pencil"></i>
-                                                                </button>
-                                                                <button
-                                                                    className="btn btn-outline-danger btn-sm"
-                                                                    onClick={() => {
-                                                                        setShowDayDetailsModal(false);
-                                                                        handleTaskActionClick(task);
-                                                                    }}
-                                                                    title="Task actions"
-                                                                >
-                                                                    <i className="bi bi-three-dots"></i>
-                                                                </button>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    ))}
                                                 </div>
                                             </div>
-                                        ))}
+                                        )}
+
+                                        {/* Events Section */}
+                                        {selectedDayEvents.length > 0 && (
+                                            <div className="mb-4">
+                                                <h6 className="text-info mb-3">
+                                                    <i className="bi bi-calendar-event me-2"></i>
+                                                    Events ({selectedDayEvents.length})
+                                                </h6>
+                                                <div className="row">
+                                                    {selectedDayEvents.map((event, idx) => (
+                                                        <div key={event.id || `event-${idx}`} className="col-12 mb-3">
+                                                            <div className="card border-0 shadow-sm">
+                                                                <div className="card-body">
+                                                                    <div className="d-flex align-items-center justify-content-between">
+                                                                        <div className="d-flex align-items-center">
+                                                                            <div className="badge me-3" 
+                                                                                 style={{ 
+                                                                                     backgroundColor: event.color || '#3b82f6',
+                                                                                     color: '#fff',
+                                                                                     minWidth: '60px'
+                                                                                 }}>
+                                                                                Event
+                                                                            </div>
+                                                                            <div>
+                                                                                <h6 className="mb-1">
+                                                                                    <i className="bi bi-calendar-event me-2"></i>
+                                                                                    {event.name}
+                                                                                    {event.date_end && (
+                                                                                        <small className="text-muted ms-2">
+                                                                                            ({new Date(event.date_start).toLocaleDateString()} - {new Date(event.date_end).toLocaleDateString()})
+                                                                                        </small>
+                                                                                    )}
+                                                                                </h6>
+                                                                                {event.description && (
+                                                                                    <small className="text-muted">{event.description}</small>
+                                                                                )}
+                                                                                {event.location && (
+                                                                                    <small className="text-muted d-block">
+                                                                                        <i className="bi bi-geo-alt me-1"></i>
+                                                                                        {event.location}
+                                                                                    </small>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="d-flex gap-2">
+                                                                            <button
+                                                                                className="btn btn-outline-info btn-sm"
+                                                                                onClick={() => {
+                                                                                    setShowDayDetailsModal(false);
+                                                                                    handleEditEventClick(event);
+                                                                                }}
+                                                                                title="Edit event"
+                                                                            >
+                                                                                <i className="bi bi-pencil"></i>
+                                                                            </button>
+                                                                            <button
+                                                                                className="btn btn-outline-danger btn-sm"
+                                                                                onClick={() => {
+                                                                                    setShowDayDetailsModal(false);
+                                                                                    handleDeleteEventClick(event);
+                                                                                }}
+                                                                                title="Delete event"
+                                                                            >
+                                                                                <i className="bi bi-trash"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="text-center py-4">
                                         <i className="bi bi-calendar-x display-4 text-muted mb-3"></i>
-                                        <h5 className="text-muted">No tasks for this date</h5>
-                                        <p className="text-muted">Click the "Add Task" button to create a new task for this date.</p>
+                                        <h5 className="text-muted">No items for this date</h5>
+                                        <p className="text-muted">Click the "Add New" button to create a task or event for this date.</p>
                                     </div>
                                 )}
                             </div>
@@ -750,11 +996,11 @@ export default function PlannerCalendar({ planner, onTaskUpdate }: PlannerCalend
                                     className="btn btn-success"
                                     onClick={() => {
                                         setShowDayDetailsModal(false);
-                                        handleCreateTaskClick(selectedDayDate);
+                                        handleAddClick(selectedDayDate);
                                     }}
                                 >
                                     <i className="bi bi-plus-circle me-2"></i>
-                                    Add New Task
+                                    Add New
                                 </button>
                                 <button 
                                     type="button" 
@@ -767,6 +1013,111 @@ export default function PlannerCalendar({ planner, onTaskUpdate }: PlannerCalend
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Add Choice Modal */}
+            {showAddChoiceModal && addChoiceDate && (
+                <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header bg-primary text-white">
+                                <h5 className="modal-title">
+                                    <i className="bi bi-plus-circle me-2"></i>
+                                    Add to {new Date(addChoiceDate + 'T00:00:00').toLocaleDateString('en-US', { 
+                                        weekday: 'long', 
+                                        month: 'long', 
+                                        day: 'numeric' 
+                                    })}
+                                </h5>
+                                <button 
+                                    type="button" 
+                                    className="btn-close btn-close-white"
+                                    onClick={() => setShowAddChoiceModal(false)}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <p className="text-muted mb-4">What would you like to add for this date?</p>
+                                
+                                <div className="row g-3">
+                                    <div className="col-md-6">
+                                        <div className="card border-success h-100">
+                                            <div className="card-body text-center p-4">
+                                                <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                                     style={{width: '60px', height: '60px'}}>
+                                                    <i className="bi bi-check2-square fs-4"></i>
+                                                </div>
+                                                <h5 className="card-title text-success">Task</h5>
+                                                <p className="card-text small text-muted mb-3">
+                                                    Create a task with priority, description, and progress tracking
+                                                </p>
+                                                <button 
+                                                    className="btn btn-success w-100"
+                                                    onClick={() => handleCreateTaskClick(addChoiceDate)}
+                                                >
+                                                    <i className="bi bi-plus-circle me-2"></i>
+                                                    Add Task
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="col-md-6">
+                                        <div className="card border-info h-100">
+                                            <div className="card-body text-center p-4">
+                                                <div className="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                                     style={{width: '60px', height: '60px'}}>
+                                                    <i className="bi bi-calendar-event fs-4"></i>
+                                                </div>
+                                                <h5 className="card-title text-info">Event</h5>
+                                                <p className="card-text small text-muted mb-3">
+                                                    Add an event with title, description, and label for organization
+                                                </p>
+                                                <button 
+                                                    className="btn btn-info w-100"
+                                                    onClick={() => handleCreateEventClick(addChoiceDate)}
+                                                >
+                                                    <i className="bi bi-plus-circle me-2"></i>
+                                                    Add Event
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button 
+                                    type="button" 
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowAddChoiceModal(false)}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Event Modals */}
+            {showCreateEventModal && eventCreationDate && (
+                <EventViewModal 
+                    event={{
+                        ...initialEvent,
+                        date_start: new Date(eventCreationDate + 'T00:00:00')
+                    }}
+                    mode="create"
+                    setShowModal={setShowCreateEventModal}
+                    plannerId={planner.id}
+                />
+            )}
+
+            {showEditEventModal && editingEvent && (
+                <EventViewModal 
+                    event={editingEvent}
+                    mode="edit"
+                    setShowModal={setShowEditEventModal}
+                    plannerId={planner.id}
+                />
             )}
         </div>
     );

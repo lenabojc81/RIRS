@@ -404,7 +404,7 @@ export default function MilestoneGoals({ planner, setEditedPlanner, onGoalAdded,
                                     <div className="card-body text-center">
                                         <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
                                              style={{width: '50px', height: '50px'}}>
-                                            <i className="bi bi-calendar4-year fs-5"></i>
+                                            <i className="bi bi-calendar-range fs-5"></i>
                                         </div>
                                         <h6 className="card-title text-primary">📅 Year Goals</h6>
                                         <p className="card-text small text-muted">
