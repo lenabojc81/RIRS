@@ -101,10 +101,28 @@ export default function TaskList() {
         return dueDate >= today && dueDate <= weekFromNow;
     };
 
+    // Helper function to check if a task was completed within the last 3 days
+    const isTaskCompletedRecentlyWithinThreeDays = (task: ITask): boolean => {
+        if (!task.date_done) return false;
+        
+        const completionDate = safeConvertDate(task.date_done);
+        if (!completionDate) return false;
+        
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); // End of today
+        
+        const threeDaysAgo = new Date(today);
+        threeDaysAgo.setDate(today.getDate() - 3);
+        threeDaysAgo.setHours(0, 0, 0, 0); // Start of 3 days ago
+        
+        return completionDate >= threeDaysAgo && completionDate <= today;
+    };
+
     // Filtering function
     const filterTasks = (tasks: ITask[], filter: FilterOption): ITask[] => {
         switch (filter) {
             case 'done':
+                // Show all completed tasks (regardless of completion date)
                 return tasks.filter(task => task.date_done);
             case 'undone':
                 return tasks.filter(task => !task.date_done);
@@ -118,7 +136,13 @@ export default function TaskList() {
                 return tasks.filter(task => !task.date_end);
             case 'all':
             default:
-                return tasks;
+                // Show all tasks, but only include completed tasks if they were completed within the last 3 days
+                return tasks.filter(task => {
+                    // If task is not completed, always show it
+                    if (!task.date_done) return true;
+                    // If task is completed, only show it if completed within last 3 days
+                    return isTaskCompletedRecentlyWithinThreeDays(task);
+                });
         }
     };
 
@@ -321,7 +345,7 @@ export default function TaskList() {
                                         onChange={(e) => setFilterBy(e.target.value as FilterOption)}
                                         style={{minWidth: '150px'}}
                                     >
-                                        <option value="all">All Tasks ({tasks.length})</option>
+                                        <option value="all">All Tasks ({tasks.filter(t => !t.date_done || isTaskCompletedRecentlyWithinThreeDays(t)).length})</option>
                                         <option value="undone">Active Tasks ({tasks.filter(t => !t.date_done).length})</option>
                                         <option value="done">Completed Tasks ({tasks.filter(t => t.date_done).length})</option>
                                         <option value="overdue">Overdue ({tasks.filter(t => isTaskOverdue(t)).length})</option>
