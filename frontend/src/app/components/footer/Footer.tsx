@@ -19,8 +19,8 @@ const Footer: React.FC = () => {
                                 <span className="text-warning">Task</span>Tracker
                             </h5>
                             <p className="text-light mb-3">
-                                Organize, prioritize, and achieve your goals with our comprehensive task and planner management system. 
-                                Stay productive and make every day count with intelligent task management and goal planning.
+                                Organize, prioritize, and achieve your goals with our comprehensive task and event management system. 
+                                Track daily habits, schedule events, organize with custom labels, and stay productive with intelligent planning tools.
                             </p>
                         </div>
                     </div>
@@ -37,6 +37,16 @@ const Footer: React.FC = () => {
                             <li className="mb-2">
                                 <Link href="/planners" className="text-light text-decoration-none hover-warning">
                                     <i className="bi bi-bullseye me-2"></i>Planners
+                                </Link>
+                            </li>
+                            <li className="mb-2">
+                                <Link href="/daily-tracker" className="text-light text-decoration-none hover-warning">
+                                    <i className="bi bi-calendar-check me-2"></i>Daily Tracker
+                                </Link>
+                            </li>
+                            <li className="mb-2">
+                                <Link href="/labels" className="text-light text-decoration-none hover-warning">
+                                    <i className="bi bi-tags me-2"></i>Labels
                                 </Link>
                             </li>
                             <li className="mb-2">
@@ -58,7 +68,12 @@ const Footer: React.FC = () => {
                             </li>
                             <li className="mb-2">
                                 <span className="text-light">
-                                    <i className="bi bi-check-circle me-2 text-warning"></i>Priority System
+                                    <i className="bi bi-check-circle me-2 text-warning"></i>Event Scheduling
+                                </span>
+                            </li>
+                            <li className="mb-2">
+                                <span className="text-light">
+                                    <i className="bi bi-check-circle me-2 text-warning"></i>Calendar Integration
                                 </span>
                             </li>
                             <li className="mb-2">
@@ -68,7 +83,12 @@ const Footer: React.FC = () => {
                             </li>
                             <li className="mb-2">
                                 <span className="text-light">
-                                    <i className="bi bi-check-circle me-2 text-warning"></i>Progress Tracking
+                                    <i className="bi bi-check-circle me-2 text-warning"></i>Daily Habit Tracking
+                                </span>
+                            </li>
+                            <li className="mb-2">
+                                <span className="text-light">
+                                    <i className="bi bi-check-circle me-2 text-warning"></i>Custom Labels
                                 </span>
                             </li>
                         </ul>

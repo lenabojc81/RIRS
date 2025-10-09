@@ -45,8 +45,8 @@ export default function LandingPage() {
                                 <span className="text-warning"> Smart Planning</span>
                             </h1>
                             <p className="lead mb-4">
-                                Transform your productivity with our comprehensive task management and goal-oriented planning system. 
-                                Break down big dreams into actionable steps and track your progress every step of the way.
+                                Transform your productivity with our comprehensive task management, event scheduling, and goal-oriented planning system. 
+                                Track daily habits, organize with custom labels, and visualize your progress with interactive calendars.
                             </p>
                             <div className="d-flex gap-3">
                                 <button 
@@ -147,9 +147,9 @@ export default function LandingPage() {
                                     <div className="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
                                         <i className="bi bi-calendar-event fs-4"></i>
                                     </div>
-                                    <h4 className="card-title">Timeline Management</h4>
+                                    <h4 className="card-title">Event Scheduling</h4>
                                     <p className="card-text text-muted">
-                                        Organize your goals across years, months, and weeks. Get a clear overview of what needs to be accomplished when.
+                                        Schedule events alongside tasks with custom colors, locations, and multi-day support. Seamlessly integrate your calendar.
                                     </p>
                                 </div>
                             </div>
@@ -173,11 +173,39 @@ export default function LandingPage() {
                             <div className="card h-100 border-0 shadow-sm">
                                 <div className="card-body text-center p-4">
                                     <div className="bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
-                                        <i className="bi bi-phone-laptop fs-4"></i>
+                                        <i className="bi bi-calendar-check fs-4"></i>
                                     </div>
-                                    <h4 className="card-title">Cross-Platform</h4>
+                                    <h4 className="card-title">Daily Habit Tracking</h4>
                                     <p className="card-text text-muted">
-                                        Access your tasks and plans from any device. Seamless synchronization keeps everything up-to-date across platforms.
+                                        Build consistent habits with daily tracking. Monitor your routines and celebrate your streaks for lasting change.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="col-md-6 col-lg-4">
+                            <div className="card h-100 border-0 shadow-sm">
+                                <div className="card-body text-center p-4">
+                                    <div className="bg-dark text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
+                                        <i className="bi bi-tags fs-4"></i>
+                                    </div>
+                                    <h4 className="card-title">Custom Labels</h4>
+                                    <p className="card-text text-muted">
+                                        Organize tasks and events with colorful custom labels. Create categories that match your workflow and priorities.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="col-md-6 col-lg-4">
+                            <div className="card h-100 border-0 shadow-sm">
+                                <div className="card-body text-center p-4">
+                                    <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
+                                        <i className="bi bi-calendar3 fs-4"></i>
+                                    </div>
+                                    <h4 className="card-title">Interactive Calendar</h4>
+                                    <p className="card-text text-muted">
+                                        Visualize your schedule with an intuitive calendar view. Switch between week and month views with smart task limits.
                                     </p>
                                 </div>
                             </div>
@@ -213,9 +241,9 @@ export default function LandingPage() {
                             <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '80px', height: '80px'}}>
                                 <span className="fs-3 fw-bold">2</span>
                             </div>
-                            <h4>Set Your Goals</h4>
+                            <h4>Plan & Schedule</h4>
                             <p className="text-muted">
-                                Create planners with milestone goals and break them down into weekly objectives.
+                                Create planners with milestone goals, schedule tasks and events, and organize everything with custom labels and colors.
                             </p>
                         </div>
                         
@@ -223,9 +251,9 @@ export default function LandingPage() {
                             <div className="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '80px', height: '80px'}}>
                                 <span className="fs-3 fw-bold">3</span>
                             </div>
-                            <h4>Track Progress</h4>
+                            <h4>Track & Achieve</h4>
                             <p className="text-muted">
-                                Monitor your achievements, complete tasks, and celebrate your milestones.
+                                Monitor progress with calendar views, track daily habits, complete tasks and events, and celebrate your milestones.
                             </p>
                         </div>
                     </div>
