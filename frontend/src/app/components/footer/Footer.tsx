@@ -79,10 +79,25 @@ const Footer: React.FC = () => {
             {/* Bottom Footer */}
             <div className="border-top border-light border-opacity-25">
                 <div className="container py-3">
-                    <div className="text-center">
-                        <small className="text-light">
-                            © {currentYear} TaskTracker. All rights reserved.
-                        </small>
+                    <div className="row align-items-center">
+                        <div className="col-md-6 text-center text-md-start">
+                            <small className="text-light">
+                                © {currentYear} TaskTracker. All rights reserved.
+                            </small>
+                        </div>
+                        <div className="col-md-6 text-center text-md-end">
+                            <small>
+                                <Link href="/privacy-policy" className="text-light text-decoration-none me-3 hover-warning">
+                                    Privacy Policy
+                                </Link>
+                                <Link href="/terms-of-service" className="text-light text-decoration-none me-3 hover-warning">
+                                    Terms of Service
+                                </Link>
+                                <Link href="/cookie-policy" className="text-light text-decoration-none hover-warning">
+                                    Cookie Policy
+                                </Link>
+                            </small>
+                        </div>
                     </div>
                 </div>
             </div>
