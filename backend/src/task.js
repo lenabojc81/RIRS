@@ -184,5 +184,100 @@ router.put('/editTask/:id', authenticateUser, async (req, res) => {
     }
 });
 
+// Get all completed tasks for the authenticated user
+router.get('/getCompletedTasks', authenticateUser, async (req, res) => {
+    try {
+        const userDocRef = doc(database, 'users', req.user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const userData = userDoc.data();
+        let tasks = userData.tasks || [];
+        
+        // Migration: Ensure all tasks have IDs
+        let needsUpdate = false;
+        tasks = tasks.map(task => {
+            if (!task.id) {
+                needsUpdate = true;
+                return { ...task, id: generateUniqueId() };
+            }
+            return task;
+        });
+        
+        // If tasks were updated with IDs, save them back to the database
+        if (needsUpdate) {
+            await updateDoc(userDocRef, {
+                tasks: tasks,
+                updatedAt: new Date()
+            });
+            console.log(`Added IDs to tasks for user: ${req.user.uid}`);
+        }
+        
+        // Filter only completed tasks
+        tasks = tasks.filter(task => task.date_done !== null && task.date_done !== undefined);
+        
+        // Sort tasks by completion date descending (most recently completed first)
+        tasks.sort((a, b) => {
+            const dateA = new Date(a.date_done.toDate ? a.date_done.toDate() : a.date_done);
+            const dateB = new Date(b.date_done.toDate ? b.date_done.toDate() : b.date_done);
+            return dateB.getTime() - dateA.getTime();
+        });
+
+        res.status(200).json(tasks);
+        console.log(`Tasks successfully fetched for user: ${req.user.uid} (${tasks.length} completed tasks)`);
+    } catch (err) {
+        console.error('Error fetching completed tasks:', err);
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// Delete multiple tasks by IDs for the authenticated user
+router.delete('/deleteTasks', authenticateUser, async (req, res) => {
+    try {
+        const { taskIds } = req.body;
+        
+        if (!taskIds || !Array.isArray(taskIds) || taskIds.length === 0) {
+            return res.status(400).json({ success: false, error: 'Task IDs array is required' });
+        }
+
+        const userDocRef = doc(database, 'users', req.user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const userData = userDoc.data();
+        const currentTasks = userData.tasks || [];
+        
+        // Filter out the tasks to delete
+        const updatedTasks = currentTasks.filter(task => !taskIds.includes(task.id));
+        
+        const deletedCount = currentTasks.length - updatedTasks.length;
+        
+        if (deletedCount === 0) {
+            return res.status(404).json({ success: false, error: 'No tasks found to delete' });
+        }
+
+        // Update user document with filtered tasks
+        await updateDoc(userDocRef, {
+            tasks: updatedTasks,
+            updatedAt: new Date()
+        });
+
+        console.log(`${deletedCount} tasks deleted for user: ${req.user.uid}`);
+        res.status(200).json({ 
+            success: true, 
+            deletedCount: deletedCount,
+            message: `Successfully deleted ${deletedCount} task(s)`
+        });
+    } catch(err) {
+        console.error('Error deleting tasks:', err);
+        res.status(400).json({ error: err.message });
+    }
+});
 
 export default router;

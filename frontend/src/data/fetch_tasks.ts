@@ -97,3 +97,49 @@ export async function updateTask(task: ITask) {
         return false;
     }
 }
+
+export async function fetchCompletedTasks(): Promise<ITask[]> {
+    try {
+        const response = await fetch(`${baseURL}/task/getCompletedTasks`, {
+            credentials: 'include', // Include authentication cookies
+        });
+        if (!response.ok) {
+            console.error("Failed to fetch completed tasks:", response.statusText);
+            return [];
+        }
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}
+
+export async function deleteMultipleTasks(taskIds: string[]): Promise<{ success: boolean; deletedCount?: number; message?: string }> {
+    try {
+        const response = await fetch(`${baseURL}/task/deleteTasks`, {
+            method: 'DELETE',
+            credentials: 'include', // Include authentication cookies
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ taskIds }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return {
+                success: data.success,
+                deletedCount: data.deletedCount,
+                message: data.message
+            };
+        } else {
+            const errorData = await response.json();
+            console.error('Error deleting tasks:', errorData.error);
+            return { success: false, message: errorData.error };
+        }
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: 'An error occurred while deleting tasks.' };
+    }
+}

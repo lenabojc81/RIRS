@@ -222,7 +222,7 @@ export default function UserPage() {
                                 </div>
                                 
                                 <div className="col-md-4">
-                                    <div className="card h-100 border-0 shadow-sm">
+                                    <div className="card h-100 border-0 shadow-sm cursor-pointer" onClick={() => router.push('/completed-tasks')}>
                                         <div className="card-body text-center p-4">
                                             <div className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
                                                  style={{width: '60px', height: '60px'}}>
